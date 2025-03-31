@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net452</TargetFramework>
+        <AssemblyName>MovementLinter</AssemblyName>
+        <RootNamespace>Celeste.Mod.MovementLinter</RootNamespace>
+        <LangVersion>12.0</LangVersion>
+        <LibPath>lib-stripped</LibPath>
+    </PropertyGroup>
+
+    <!--Disable "Copy Local" for all references-->
+    <ItemDefinitionGroup>
+        <PackageReference PrivateAssets="all" ExcludeAssets="runtime" />
+        <Reference Private="false" />
+    </ItemDefinitionGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MonoMod.RuntimeDetour" Version="22.01.04.03" PrivateAssets="all" ExcludeAssets="runtime" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="$(LibPath)\FNA.dll"></Reference>
+        <Reference Include="$(LibPath)\Celeste.dll"></Reference>
+        <Reference Include="$(LibPath)\MMHOOK_Celeste.dll"></Reference>
+        <Reference Include="$(LibPath)\SpeedrunTool.dll"></Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="everest.yaml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Dialog\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <PathMap>$(MSBuildProjectDirectory)=MovementLinter/</PathMap>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    </PropertyGroup>
+
+</Project>

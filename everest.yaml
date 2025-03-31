@@ -1,0 +1,9 @@
+- Name: MovementLinter
+  Version: 0.1.0
+  DLL: MovementLinter.dll
+  Dependencies:
+    - Name: Everest
+      Version: 1.3876.0
+  OptionalDependencies:
+    - Name: SpeedrunTool
+      Version: 3.7.11
