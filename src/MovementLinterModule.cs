@@ -19,6 +19,11 @@ public class MovementLinterModule : EverestModule {
         Instance = this;
     }
 
+    public override void CreateModMenuSection(TextMenu menu, bool inGame, FMOD.Studio.EventInstance pauseSnapshot) {
+        CreateModMenuSectionHeader(menu, inGame, pauseSnapshot);
+        Settings.CreateMenu(menu, inGame);
+    }
+
     // =================================================================================================================
     // Some extra stuff we need to set up while loading
     private static bool speedrunToolIsLoaded   = false;
@@ -26,7 +31,7 @@ public class MovementLinterModule : EverestModule {
     private static ILHook PlayerOrigUpdateHook = null;
 
     // =================================================================================================================
-    // All the state needed for business logic, wrapped in a struct for easy savestates.
+    // All the state needed for detection logic, wrapped in a struct for easy savestates.
     private const int BeyondShortDurationFrames = MovementLinterModuleSettings.MaxShortDurationFrames + 1;
     public struct Detection {
         public Detection() {}
@@ -179,14 +184,12 @@ public class MovementLinterModule : EverestModule {
         det.LastFinishedUpdateState = det.FrameStartPlayerState;
 
         // Jump release
-        if (Settings.Enabled &&
-                Settings.JumpReleaseJump.Enabled &&
-                det.LastFinishedUpdateState == Player.StNormal &&
+        if (det.LastFinishedUpdateState == Player.StNormal &&
                 jumpPressed &&
                 det.JumpReleaseFrames > 0 &&
                 det.JumpReleaseFrames <= Settings.JumpReleaseJump.Frames &&
                 det.JumpReleaseMatters) {
-            DoLintAction(Settings.JumpReleaseJump.Action,
+            DoLintAction(Settings.JumpReleaseJump,
                          $"Detected jump press after {det.JumpReleaseFrames}-frame jump release");
         }
         if (Input.Jump.Check) {
@@ -264,10 +267,8 @@ public class MovementLinterModule : EverestModule {
         // There are multiple competing off-by-one... quirks... surrounding wallboosts.
         // I'm not going to explain all of them, just trust me, this is the right number to use.
         int wallBoostFrames = (int) Math.Round((Player.ClimbJumpBoostTime - player.wallBoostTimer) * 60f) - 1;
-        if (Settings.Enabled &&
-                Settings.ShortWallboost.Enabled &&
-                wallBoostFrames <= Settings.ShortWallboost.Frames) {
-            DoLintAction(Settings.ShortWallboost.Action, $"Detected {wallBoostFrames}-frame wallboost");
+        if (wallBoostFrames <= Settings.ShortWallboost.Frames) {
+            DoLintAction(Settings.ShortWallboost, $"Detected {wallBoostFrames}-frame wallboost");
         }
     }
 
@@ -338,12 +339,10 @@ public class MovementLinterModule : EverestModule {
     }
 
     private static void CheckBufferedUltra(Player player) {
-        if (Settings.Enabled &&
-                Settings.BufferedUltra.Mode != MovementLinterModuleSettings.BufferedUltraMode.Disabled &&
-                !player.wasOnGround &&
+        if (!player.wasOnGround &&
                 ((player.DashDir.X != 0f && player.DashDir.Y > 0f && player.Speed.Y > 0f) ||
                  (Settings.BufferedUltra.Mode == MovementLinterModuleSettings.BufferedUltraMode.Always && det.UltradLastFrame))) {
-            DoLintAction(Settings.BufferedUltra.Action, "Detected buffered ultra");
+            DoLintAction(Settings.BufferedUltra, "Detected buffered ultra");
         }
     }
 
@@ -368,12 +367,10 @@ public class MovementLinterModule : EverestModule {
             det.FastfallCheckedThisFrame = false;
         }
         if (button == Input.Jump || button == Input.Dash) {
-            if (Settings.Enabled &&
-                    Settings.MoveAfterGainControl.Enabled &&
-                    det.InControlFrames > 0 &&
+            if (det.InControlFrames > 0 &&
                     det.InControlFrames <= Settings.MoveAfterGainControl.Frames &&
                     button.bufferCounter == button.BufferTime) {
-                DoLintAction(Settings.MoveAfterGainControl.Action,
+                DoLintAction(Settings.MoveAfterGainControl,
                              $"Detected movement action {det.InControlFrames} " +
                              $"frame{(det.InControlFrames > 1 ? "s" : "")} late after gaining control");
             }
@@ -385,13 +382,12 @@ public class MovementLinterModule : EverestModule {
     private static void OnPlayerJump(On.Celeste.Player.orig_Jump orig, Player player,
                                      bool particles, bool playSfx) {
         orig(player, particles, playSfx);
-        if (Settings.Enabled &&
-                ((Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.DashOrJump) ||
-                 (Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.JumpOnly)) &&
+        if (((Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.DashOrJump) ||
+             (Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.JumpOnly)) &&
                 det.FramesAfterLand > 0 &&
                 det.FramesAfterLand <= Settings.MoveAfterLand.Frames &&
                 !(Settings.MoveAfterLand.IgnoreUltras && det.UltradSinceLanding)) {
-            DoLintAction(Settings.MoveAfterLand.Action,
+            DoLintAction(Settings.MoveAfterLand,
                          $"Detected jump {det.FramesAfterLand} frame{(det.FramesAfterLand > 1 ? "s" : "")} " +
                           "late after landing");
         }
@@ -400,17 +396,14 @@ public class MovementLinterModule : EverestModule {
     // =================================================================================================================
     private static void OnPlayerWallJump(On.Celeste.Player.orig_WallJump orig, Player player, int dir) {
         // dir is the direction you're jumping, not the direction of the location of the wall compared to madeline
-        if (Settings.Enabled &&
-                Settings.TurnBeforeWallkick.Enabled &&
-                det.LastFinishedUpdateState == Player.StNormal &&
+        if (det.LastFinishedUpdateState == Player.StNormal &&
                 !det.ForceMoveXActive &&
                 !det.FirstMoveX &&
                 dir != 0 &&
                 Math.Sign(det.FrameStartPlayerSpeed.X) != dir &&
                 !det.LastMoveXWasForward &&
                 det.MoveXFrames <= Settings.TurnBeforeWallkick.Frames) {
-            Console.Write("Detected turn before wallkick\n");
-            DoLintAction(Settings.TurnBeforeWallkick.Action,
+            DoLintAction(Settings.TurnBeforeWallkick,
                          $"Detected moveX change {det.MoveXFrames} frame{(det.MoveXFrames > 1 ? "s" : "")} " +
                           "before wallkick");
         }
@@ -420,49 +413,40 @@ public class MovementLinterModule : EverestModule {
     // =================================================================================================================
     private static int OnPlayerStartDash(On.Celeste.Player.orig_StartDash orig, Player player) {
         const int UpEntryDashLockoutFrames = 11;
-        if (Settings.Enabled &&
-                Settings.JumpReleaseDash.Enabled &&
-                det.LastFinishedUpdateState == Player.StNormal &&
+        if (det.LastFinishedUpdateState == Player.StNormal &&
                 det.JumpReleaseFrames > 0 &&
                 det.JumpReleaseFrames <= Settings.JumpReleaseDash.Frames &&
                 det.JumpReleaseMatters) {
-            DoLintAction(Settings.JumpReleaseDash.Action,
+            DoLintAction(Settings.JumpReleaseDash,
                          $"Detected dash after {det.JumpReleaseFrames}-frame jump release");
         }
-        if (Settings.Enabled &&
-                Settings.ReleaseWBeforeDash.Enabled &&
-                det.LastFinishedUpdateState == Player.StNormal &&
+        if (det.LastFinishedUpdateState == Player.StNormal &&
                 !det.ForceMoveXActive &&
                 !det.LastMoveXWasForward &&
                 det.MoveXFrames <= Settings.ReleaseWBeforeDash.Frames) {
-            DoLintAction(Settings.ReleaseWBeforeDash.Action,
+            DoLintAction(Settings.ReleaseWBeforeDash,
                          $"Detected moveX change {det.MoveXFrames} frame{(det.MoveXFrames > 1 ? "s" : "")} " +
                           "before dash");
         }
-        if (Settings.Enabled &&
-                Settings.FastfallGlitchBeforeDash.Enabled &&
-                det.FastfallCheckedLastFrame &&
+        if (det.FastfallCheckedLastFrame &&
                 !det.FirstFastfallInput &&
                 det.FastfallMoveYFrames <= Settings.FastfallGlitchBeforeDash.Frames) {
-            DoLintAction(Settings.FastfallGlitchBeforeDash.Action,
+            DoLintAction(Settings.FastfallGlitchBeforeDash,
                          $"Detected fastfall input change {det.FastfallMoveYFrames} " +
                          $"frame{(det.FastfallMoveYFrames > 1 ? "s" : "")} before dash");
         }
-        if (Settings.Enabled &&
-                ((Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.DashOnly) ||
-                 (Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.DashOrJump)) &&
+        if (((Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.DashOnly) ||
+             (Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.DashOrJump)) &&
                 det.FramesAfterLand > 0 &&
                 det.FramesAfterLand <= Settings.MoveAfterLand.Frames) {
-            DoLintAction(Settings.MoveAfterLand.Action,
+            DoLintAction(Settings.MoveAfterLand,
                          $"Detected dash {det.FramesAfterLand} frame{(det.FramesAfterLand > 1 ? "s" : "")} " +
                           "late after landing");
         }
         int dashLateFramesAfterUpEntry = det.FramesSinceUpTransition - UpEntryDashLockoutFrames;
-        if (Settings.Enabled &&
-                Settings.DashAfterUpEntry.Enabled &&
-                dashLateFramesAfterUpEntry > 0 &&
+        if (dashLateFramesAfterUpEntry > 0 &&
                 dashLateFramesAfterUpEntry <= Settings.DashAfterUpEntry.Frames) {
-            DoLintAction(Settings.DashAfterUpEntry.Action,
+            DoLintAction(Settings.DashAfterUpEntry,
                          $"Detected dash {dashLateFramesAfterUpEntry} " +
                          $"frame{(dashLateFramesAfterUpEntry > 1 ? "s" : "")} late after up transition");
         }
@@ -489,16 +473,14 @@ public class MovementLinterModule : EverestModule {
     private static void OnLevelTransitionTo(On.Celeste.Level.orig_TransitionTo orig, Level level, LevelData next,
                                             Vector2 direction) {
         orig(level, next, direction);
-        if (Settings.Enabled &&
-                Settings.JumpReleaseExit.Enabled &&
-                ((Settings.JumpReleaseExit.Direction == MovementLinterModuleSettings.TransitionDirection.UpOnly && direction.Y == -1) ||
-                 (Settings.JumpReleaseExit.Direction == MovementLinterModuleSettings.TransitionDirection.NotDown && direction.Y <= 0) ||
-                 (Settings.JumpReleaseExit.Direction == MovementLinterModuleSettings.TransitionDirection.Any)) &&
+        if (((Settings.JumpReleaseExit.Mode == MovementLinterModuleSettings.TransitionDirection.UpOnly && direction.Y == -1) ||
+             (Settings.JumpReleaseExit.Mode == MovementLinterModuleSettings.TransitionDirection.NotDown && direction.Y <= 0) ||
+             (Settings.JumpReleaseExit.Mode == MovementLinterModuleSettings.TransitionDirection.Any)) &&
                 det.JumpReleaseFrames > 0 &&
                 det.JumpReleaseFrames <= Settings.JumpReleaseExit.Frames &&
                 det.JumpReleaseMatters &&
                 det.FrameStartPlayerState == Player.StNormal) {
-            DoLintAction(Settings.JumpReleaseExit.Action,
+            DoLintAction(Settings.JumpReleaseExit,
                          $"Detected room transition after {det.JumpReleaseFrames}-frame jump release");
         }
         det.JumpReleaseFrames  = BeyondShortDurationFrames;
@@ -509,8 +491,12 @@ public class MovementLinterModule : EverestModule {
     }
 
     // =================================================================================================================
-    private static void DoLintAction(MovementLinterModuleSettings.LintAction action, String explanation) {
-        switch (action) {
+    private static void DoLintAction<ModeT>(MovementLinterModuleSettings.LintRuleSettings<ModeT> lintRuleSettings,
+                                            string explanation) {
+        if (!Settings.Enabled || !lintRuleSettings.IsEnabled()) {
+            return;
+        }
+        switch (lintRuleSettings.Action) {
         case MovementLinterModuleSettings.LintAction.Kill:
             // We could be getting called from anywhere, maybe this is a bad time to kill the player
             // (if the player even exists right now), so just set this flag and we'll handle it in player update.

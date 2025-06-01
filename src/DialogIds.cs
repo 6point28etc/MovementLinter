@@ -5,6 +5,7 @@ public static class DialogIds {
     public const string Enabled        = "MOVEMENT_LINTER_ENABLED";
     public const string Off            = "MOVEMENT_LINTER_OFF";
     public const string Mode           = "MOVEMENT_LINTER_MODE";
+    public const string None           = "MOVEMENT_LINTER_NONE";
 
     public const string LintAction     = "MOVEMENT_LINTER_LINT_ACTION";
     public const string LintActionKill = "MOVEMENT_LINTER_LINT_ACTION_KILL";
@@ -26,6 +27,7 @@ public static class DialogIds {
     public const string JumpReleaseExitAny       = "MOVEMENT_LINTER_JUMP_RELEASE_EXIT_ANY";
 
     public const string MoveAfterLand             = "MOVEMENT_LINTER_MOVE_AFTER_LAND";
+    public const string MoveAfterLandMode         = "MOVEMENT_LINTER_MOVE_AFTER_LAND_MODE";
     public const string MoveAfterLandDashOnly     = "MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_ONLY";
     public const string MoveAfterLandDashOrJump   = "MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_OR_JUMP";
     public const string MoveAfterLandJumpOnly     = "MOVEMENT_LINTER_MOVE_AFTER_LAND_JUMP_ONLY";
@@ -54,7 +56,7 @@ public static class DialogIds {
     public const string TurnBeforeWallkickFrames = "MOVEMENT_LINTER_TURN_BEFORE_WALLKICK_FRAMES";
 
     public const string ShortWallboost       = "MOVEMENT_LINTER_SHORT_WALLBOOST";
-    public const string ShortWallboostFrames = "MOVEMENT_LINTER_WALLBOOST_FRAMES";
+    public const string ShortWallboostFrames = "MOVEMENT_LINTER_SHORT_WALLBOOST_FRAMES";
     public const string ShortWallboostHint   = "MOVEMENT_LINTER_SHORT_WALLBOOST_HINT";
 
     public const string BufferedUltra                 = "MOVEMENT_LINTER_BUFFERED_ULTRA";

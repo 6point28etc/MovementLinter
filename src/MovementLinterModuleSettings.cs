@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using Celeste.Mod.TextMenuLib;
+
 namespace Celeste.Mod.MovementLinter;
 
 [SettingName(DialogIds.MovementLinter)]
@@ -7,6 +10,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         Kill,
     };
     public enum TransitionDirection {
+        None,
         UpOnly,
         NotDown,
         Any,
@@ -26,379 +30,397 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     public const int MaxShortWallboostFrames = 11;
 
     // =================================================================================================================
-    [SettingName(DialogIds.Enabled)]
     public bool Enabled { get; set; } = true;
 
     // =================================================================================================================
-    [SettingSubMenu]
-    public class JumpReleaseJumpSubMenu {
-        [SettingName(DialogIds.Enabled)]
-        public bool Enabled { get; set; } = true;
+    /// <summary>
+    ///     Base class for all the settings associated with a single heuristic rule / check
+    /// </summary>
+    /// <typeparam name="ModeT">
+    ///     Type of the "mode" setting for this rule
+    ///     (bool for a simple on/off toggle, or some enum for a richer set of mode options)
+    /// </typeparam>
+    public abstract class LintRuleSettings<ModeT> {
+        private readonly string titleId;
+        private readonly string hintId;
 
+        public ModeT Mode { get; set; }
         public LintAction Action { get; set; } = LintAction.Kill;
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
+
+        public LintRuleSettings(ModeT defaultMode, string titleId, string hintId) {
+            this.Mode    = defaultMode;
+            this.titleId = titleId;
+            this.hintId  = hintId;
         }
 
-        [SettingRange(1, MaxShortDurationFrames)]
-        [SettingName(DialogIds.JumpReleaseJumpFrames)]
-        public int Frames { get; set; } = 2;
+        /// <summary>
+        ///     Return a submenu to control the settings for this lint rule
+        /// </summary>
+        /// <param name="inGame"> Whether the menu was opened in-game vs from the main menu</param>
+        /// <param name="topMenu">The top-level TextMenu containing this submenu</param>
+        public RecursiveSubMenu MakeSubMenu(bool inGame, TextMenu topMenu) {
+            List<TextMenu.Item> items = [
+                MakeModeMenuItem().Change((ModeT val) => Mode = val),
+                new RecursiveOptionSubMenu(
+                    label: Dialog.Clean(DialogIds.LintAction),
+                    initialMenuSelection: (int) Action,
+                    menus: [
+                        new(Dialog.Clean(DialogIds.LintActionKill), [])
+                    ]
+                ).Change((int val) => Action = (LintAction) val)
+            ];
+            items.AddRange(MakeUniqueMenuItems(inGame));
+            items.Add(new TextMenuExt.EaseInSubHeaderExt(Dialog.Clean(hintId), true, topMenu){ HeightExtra = 0f });
+            return new RecursiveSubMenu(label: Dialog.Clean(titleId), items: items);
+        }
+
+        /// <summary>
+        ///     Returns true if this rule should be enabled in some form, false if it should be completely disabled
+        /// </summary>
+        public abstract bool IsEnabled();
+
+        /// <summary>
+        ///     Make the menu widget that controls the <see cref="Mode"/> property
+        /// </summary>
+        protected abstract TextMenu.Option<ModeT> MakeModeMenuItem();
+
+        /// <summary>
+        ///     Make any additional menu widgets to control properties not defined in the base class
+        /// </summary>
+        /// <param name="inGame">Whether the menu was opened in-game vs from the main menu</param>
+        protected abstract List<TextMenu.Item> MakeUniqueMenuItems(bool inGame);
     }
-    [SettingName(DialogIds.JumpReleaseJump)]
-    [SettingSubText(DialogIds.JumpReleaseJumpHint)]
-    public JumpReleaseJumpSubMenu JumpReleaseJump { get; set; } = new();
 
     // =================================================================================================================
-    [SettingSubMenu]
-    public class JumpReleaseDashSubMenu {
-        [SettingName(DialogIds.Enabled)]
-        public bool Enabled { get; set; } = true;
+    public class JumpReleaseJumpSettings : LintRuleSettings<bool> {
+        public int Frames { get; set; } = 2;
 
-        public LintAction Action { get; set; } = LintAction.Kill;
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
+        public JumpReleaseJumpSettings() : base(true, DialogIds.JumpReleaseJump, DialogIds.JumpReleaseJumpHint) {}
+
+        public override bool IsEnabled() => Mode;
+
+        protected override TextMenu.Option<bool> MakeModeMenuItem() {
+            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
-        [SettingRange(1, MaxShortDurationFrames)]
-        [SettingName(DialogIds.JumpReleaseDashFrames)]
-        public int Frames { get; set; } = 2;
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new TextMenu.Slider(
+                    label  : Dialog.Clean(DialogIds.JumpReleaseJumpFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortDurationFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
     }
-    [SettingName(DialogIds.JumpReleaseDash)]
-    [SettingSubText(DialogIds.JumpReleaseDashHint)]
-    public JumpReleaseDashSubMenu JumpReleaseDash { get; set; } = new();
+    public JumpReleaseJumpSettings JumpReleaseJump { get; set; } = new();
 
     // =================================================================================================================
-    [SettingSubMenu]
-    public class JumpReleaseExitSubMenu {
-        [SettingName(DialogIds.Enabled)]
-        public bool Enabled { get; set; } = true;
+    public class JumpReleaseDashSettings : LintRuleSettings<bool>{
+        public int Frames { get; set; } = 3;
 
-        public LintAction Action { get; set; } = LintAction.Kill;
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
+        public JumpReleaseDashSettings() : base(true, DialogIds.JumpReleaseDash, DialogIds.JumpReleaseDashHint) {}
+
+        public override bool IsEnabled() => Mode;
+
+        protected override TextMenu.Option<bool> MakeModeMenuItem() {
+            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
-        public TransitionDirection Direction { get; set; } = TransitionDirection.UpOnly;
-        public void CreateDirectionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider DirectionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.JumpReleaseExitDirection),
-                values: TransitionDirectionToString,
-                min: (int) TransitionDirection.UpOnly,
-                max: (int) TransitionDirection.Any,
-                value: (int) Direction
-            );
-            DirectionEntry.Change(newValue => Direction = (TransitionDirection) newValue);
-            subMenu.Add(DirectionEntry);
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new TextMenu.Slider(
+                    label  : Dialog.Clean(DialogIds.JumpReleaseDashFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortDurationFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
         }
-
-        [SettingRange(1, MaxShortDurationFrames)]
-        [SettingName(DialogIds.JumpReleaseExitFrames)]
-        public int Frames { get; set; } = 2;
     }
-    [SettingName(DialogIds.JumpReleaseExit)]
-    [SettingSubText(DialogIds.JumpReleaseExitHint)]
-    public JumpReleaseExitSubMenu JumpReleaseExit { get; set; } = new();
+    public JumpReleaseDashSettings JumpReleaseDash { get; set; } = new();
 
     // =================================================================================================================
-    [SettingSubMenu]
-    public class MoveAfterLandSubMenu {
-        public MoveAfterLandMode Mode { get; set; } = MoveAfterLandMode.DashOnly;
-        public void CreateModeEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ModeEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.Mode),
-                values: MoveAfterLandModeToString,
-                min: (int) MoveAfterLandMode.Disabled,
-                max: (int) MoveAfterLandMode.JumpOnly,
-                value: (int) Mode
-            );
-            ModeEntry.Change(newValue => Mode = (MoveAfterLandMode) newValue);
-            subMenu.Add(ModeEntry);
+    public class JumpReleaseExitSettings : LintRuleSettings<TransitionDirection> {
+        public int Frames { get; set; } = 6;
+
+        public JumpReleaseExitSettings()
+            : base(TransitionDirection.UpOnly, DialogIds.JumpReleaseExit, DialogIds.JumpReleaseExitHint) {}
+
+        public override bool IsEnabled() => Mode != TransitionDirection.None;
+
+        protected override TextMenu.Option<TransitionDirection> MakeModeMenuItem() {
+            return new TextMenu.Option<TransitionDirection>(Dialog.Clean(DialogIds.JumpReleaseExitDirection))
+                .Add(Dialog.Clean(DialogIds.None), TransitionDirection.None,
+                     Mode == TransitionDirection.None)
+                .Add(Dialog.Clean(DialogIds.JumpReleaseExitUp), TransitionDirection.UpOnly,
+                     Mode == TransitionDirection.UpOnly)
+                .Add(Dialog.Clean(DialogIds.JumpReleaseExitNotDown), TransitionDirection.NotDown,
+                     Mode == TransitionDirection.NotDown)
+                .Add(Dialog.Clean(DialogIds.JumpReleaseExitAny), TransitionDirection.Any,
+                     Mode == TransitionDirection.Any);
         }
 
-        [SettingName(DialogIds.MoveAfterLandIgnoreUltras)]
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new TextMenu.Slider(
+                    label  : Dialog.Clean(DialogIds.JumpReleaseExitFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortDurationFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
+    }
+    public JumpReleaseExitSettings JumpReleaseExit { get; set; } = new();
+
+    // =================================================================================================================
+    public class MoveAfterLandSettings : LintRuleSettings<MoveAfterLandMode> {
         public bool IgnoreUltras { get; set; } = true;
+        public int Frames { get; set; }        = 3;
 
-        public LintAction Action { get; set; } = LintAction.Kill;
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
+        public MoveAfterLandSettings()
+            : base(MoveAfterLandMode.DashOnly, DialogIds.MoveAfterLand, DialogIds.MoveAfterLandHint) {}
+
+        public override bool IsEnabled() => Mode != MoveAfterLandMode.Disabled;
+
+        protected override TextMenu.Option<MoveAfterLandMode> MakeModeMenuItem() {
+            return new TextMenu.Option<MoveAfterLandMode>(Dialog.Clean(DialogIds.MoveAfterLandMode))
+                .Add(Dialog.Clean(DialogIds.None), MoveAfterLandMode.Disabled,
+                     Mode == MoveAfterLandMode.Disabled)
+                .Add(Dialog.Clean(DialogIds.MoveAfterLandDashOnly), MoveAfterLandMode.DashOnly,
+                     Mode == MoveAfterLandMode.DashOnly)
+                .Add(Dialog.Clean(DialogIds.MoveAfterLandDashOrJump), MoveAfterLandMode.DashOrJump,
+                     Mode == MoveAfterLandMode.DashOrJump)
+                .Add(Dialog.Clean(DialogIds.MoveAfterLandJumpOnly), MoveAfterLandMode.JumpOnly,
+                     Mode == MoveAfterLandMode.JumpOnly);
         }
 
-        [SettingRange(1, MaxShortDurationFrames)]
-        [SettingName(DialogIds.MoveAfterLandFrames)]
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new TextMenu.OnOff(Dialog.Clean(DialogIds.MoveAfterLandIgnoreUltras), IgnoreUltras).Change(
+                    (bool val) => IgnoreUltras = val),
+                new TextMenu.Slider(
+                    label  : Dialog.Clean(DialogIds.MoveAfterLandFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortDurationFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
+    }
+    public MoveAfterLandSettings MoveAfterLand { get; set; } = new();
+
+    // =================================================================================================================
+    public class MoveAfterGainControlSettings : LintRuleSettings<bool>{
         public int Frames { get; set; } = 3;
-    }
-    [SettingName(DialogIds.MoveAfterLand)]
-    [SettingSubText(DialogIds.MoveAfterLandHint)]
-    public MoveAfterLandSubMenu MoveAfterLand { get; set; } = new();
 
-    // =================================================================================================================
-    [SettingSubMenu]
-    public class MoveAfterGainControlSubMenu {
-        [SettingName(DialogIds.Enabled)]
-        public bool Enabled { get; set; } = true;
+        public MoveAfterGainControlSettings()
+            : base(true, DialogIds.MoveAfterGainControl, DialogIds.MoveAfterGainControlHint) {}
 
-        public LintAction Action { get; set; }
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
+        public override bool IsEnabled() => Mode;
+
+        protected override TextMenu.Option<bool> MakeModeMenuItem() {
+            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
-        [SettingRange(1, MaxShortDurationFrames)]
-        [SettingName(DialogIds.MoveAfterGainControlFrames)]
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new TextMenu.Slider(
+                    label  : Dialog.Clean(DialogIds.MoveAfterGainControlFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortDurationFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
+    }
+    public MoveAfterGainControlSettings MoveAfterGainControl { get; set; } = new();
+
+    // =================================================================================================================
+    public class DashAfterUpEntrySettings : LintRuleSettings<bool>{
         public int Frames { get; set; } = 3;
-    }
-    [SettingName(DialogIds.MoveAfterGainControl)]
-    [SettingSubText(DialogIds.MoveAfterGainControlHint)]
-    public MoveAfterGainControlSubMenu MoveAfterGainControl { get; set; } = new();
 
-    // =================================================================================================================
-    [SettingSubMenu]
-    public class DashAfterUpEntrySubMenu {
-        [SettingName(DialogIds.Enabled)]
-        public bool Enabled { get; set; } = true;
+        public DashAfterUpEntrySettings() : base(true, DialogIds.DashAfterUpEntry, DialogIds.DashAfterUpEntryHint) {}
 
-        public LintAction Action { get; set; }
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
+        public override bool IsEnabled() => Mode;
+
+        protected override TextMenu.Option<bool> MakeModeMenuItem() {
+            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
-        [SettingRange(1, MaxShortDurationFrames)]
-        [SettingName(DialogIds.DashAfterUpEntryFrames)]
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new TextMenu.Slider(
+                    label  : Dialog.Clean(DialogIds.DashAfterUpEntryFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortDurationFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
+    }
+    public DashAfterUpEntrySettings DashAfterUpEntry { get; set; } = new();
+
+    // =================================================================================================================
+    public class ReleaseWBeforeDashSettings : LintRuleSettings<bool>{
+        public int Frames { get; set; } = 4;
+
+        public ReleaseWBeforeDashSettings()
+            : base(true, DialogIds.ReleaseWBeforeDash, DialogIds.ReleaseWBeforeDashHint) {}
+
+        public override bool IsEnabled() => Mode;
+
+        protected override TextMenu.Option<bool> MakeModeMenuItem() {
+            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        }
+
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new TextMenu.Slider(
+                    label  : Dialog.Clean(DialogIds.ReleaseWBeforeDashFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortDurationFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
+    }
+    public ReleaseWBeforeDashSettings ReleaseWBeforeDash { get; set; } = new();
+
+    // =================================================================================================================
+    public class FastfallGlitchBeforeDashSettings : LintRuleSettings<bool>{
+        public int Frames { get; set; } = 4;
+
+        public FastfallGlitchBeforeDashSettings()
+            : base(true, DialogIds.FastfallGlitchBeforeDash, DialogIds.FastfallGlitchBeforeDashHint) {}
+
+        public override bool IsEnabled() => Mode;
+
+        protected override TextMenu.Option<bool> MakeModeMenuItem() {
+            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        }
+
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new TextMenu.Slider(
+                    label  : Dialog.Clean(DialogIds.FastfallGlitchBeforeDashFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortDurationFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
+    }
+    public FastfallGlitchBeforeDashSettings FastfallGlitchBeforeDash { get; set; } = new();
+
+    // =================================================================================================================
+    public class TurnBeforeWallkickSettings : LintRuleSettings<bool>{
+        public int Frames { get; set; } = 4;
+
+        public TurnBeforeWallkickSettings()
+            : base(true, DialogIds.TurnBeforeWallkick, DialogIds.TurnBeforeWallkickHint) {}
+
+        public override bool IsEnabled() => Mode;
+
+        protected override TextMenu.Option<bool> MakeModeMenuItem() {
+            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        }
+
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new TextMenu.Slider(
+                    label  : Dialog.Clean(DialogIds.TurnBeforeWallkickFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortDurationFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
+    }
+    public TurnBeforeWallkickSettings TurnBeforeWallkick { get; set; } = new();
+
+    // =================================================================================================================
+    public class ShortWallboostSettings : LintRuleSettings<bool>{
         public int Frames { get; set; } = 3;
+
+        public ShortWallboostSettings() : base(true, DialogIds.ShortWallboost, DialogIds.ShortWallboostHint) {}
+
+        public override bool IsEnabled() => Mode;
+
+        protected override TextMenu.Option<bool> MakeModeMenuItem() {
+            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        }
+
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new TextMenu.Slider(
+                    label  : Dialog.Clean(DialogIds.ShortWallboostFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortWallboostFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
     }
-    [SettingName(DialogIds.DashAfterUpEntry)]
-    [SettingSubText(DialogIds.DashAfterUpEntryHint)]
-    public DashAfterUpEntrySubMenu DashAfterUpEntry { get; set; } = new();
+    public ShortWallboostSettings ShortWallboost { get; set; } = new();
 
     // =================================================================================================================
-    [SettingSubMenu]
-    public class ReleaseWBeforeDashSubMenu {
-        [SettingName(DialogIds.Enabled)]
-        public bool Enabled { get; set; } = true;
+    public class BufferedUltraSettings : LintRuleSettings<BufferedUltraMode> {
+        public BufferedUltraSettings()
+            : base(BufferedUltraMode.OnlyWhenMattered, DialogIds.BufferedUltra, DialogIds.BufferedUltraHint) {}
 
-        public LintAction Action { get; set; } = LintAction.Kill;
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
+        public override bool IsEnabled() => Mode != BufferedUltraMode.Disabled;
+
+        protected override TextMenu.Option<BufferedUltraMode> MakeModeMenuItem() {
+            return new TextMenu.Option<BufferedUltraMode>(Dialog.Clean(DialogIds.Mode))
+                .Add(Dialog.Clean(DialogIds.Off), BufferedUltraMode.Disabled,
+                     Mode == BufferedUltraMode.Disabled)
+                .Add(Dialog.Clean(DialogIds.BufferedUltraOnlyWhenMattered), BufferedUltraMode.OnlyWhenMattered,
+                     Mode == BufferedUltraMode.OnlyWhenMattered)
+                .Add(Dialog.Clean(DialogIds.BufferedUltraAlways), BufferedUltraMode.Always,
+                     Mode == BufferedUltraMode.Always);
         }
 
-        [SettingRange(1, MaxShortDurationFrames)]
-        [SettingName(DialogIds.ReleaseWBeforeDashFrames)]
-        public int Frames { get; set; } = 4;
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [];
+        }
     }
-    [SettingName(DialogIds.ReleaseWBeforeDash)]
-    [SettingSubText(DialogIds.ReleaseWBeforeDashHint)]
-    public ReleaseWBeforeDashSubMenu ReleaseWBeforeDash { get; set; } = new();
+    public BufferedUltraSettings BufferedUltra { get; set; } = new();
 
     // =================================================================================================================
-    [SettingSubMenu]
-    public class FastfallGlitchBeforeDashSubMenu {
-        [SettingName(DialogIds.Enabled)]
-        public bool Enabled { get; set; } = true;
+    public void CreateMenu(TextMenu menu, bool inGame) {
+        TextMenu.OnOff mainEnable         = new(Dialog.Clean(DialogIds.Enabled), Enabled);
+        RecursiveNakedSubMenu mainSubMenu = new(initiallyExpanded: Enabled);
+        mainEnable.Change((bool val) => {
+            Enabled = val;
+            mainSubMenu.Expanded = val;
+        });
 
-        public LintAction Action { get; set; } = LintAction.Kill;
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
-        }
+        mainSubMenu.AddItem(JumpReleaseJump.MakeSubMenu(inGame, menu))
+                   .AddItem(JumpReleaseDash.MakeSubMenu(inGame, menu))
+                   .AddItem(JumpReleaseExit.MakeSubMenu(inGame, menu))
+                   .AddItem(MoveAfterLand.MakeSubMenu(inGame, menu))
+                   .AddItem(MoveAfterGainControl.MakeSubMenu(inGame, menu))
+                   .AddItem(DashAfterUpEntry.MakeSubMenu(inGame, menu))
+                   .AddItem(ReleaseWBeforeDash.MakeSubMenu(inGame, menu))
+                   .AddItem(FastfallGlitchBeforeDash.MakeSubMenu(inGame, menu))
+                   .AddItem(TurnBeforeWallkick.MakeSubMenu(inGame, menu))
+                   .AddItem(ShortWallboost.MakeSubMenu(inGame, menu))
+                   .AddItem(BufferedUltra.MakeSubMenu(inGame, menu));
 
-        [SettingRange(1, MaxShortDurationFrames)]
-        [SettingName(DialogIds.FastfallGlitchBeforeDashFrames)]
-        public int Frames { get; set; } = 4;
-    }
-    [SettingName(DialogIds.FastfallGlitchBeforeDash)]
-    [SettingSubText(DialogIds.FastfallGlitchBeforeDashHint)]
-    public FastfallGlitchBeforeDashSubMenu FastfallGlitchBeforeDash { get; set; } = new();
-
-    // =================================================================================================================
-    [SettingSubMenu]
-    public class TurnBeforeWallkickSubMenu {
-        [SettingName(DialogIds.Enabled)]
-        public bool Enabled { get; set; } = true;
-
-        public LintAction Action { get; set; } = LintAction.Kill;
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
-        }
-
-        [SettingRange(1, MaxShortDurationFrames)]
-        [SettingName(DialogIds.TurnBeforeWallkickFrames)]
-        public int Frames { get; set; } = 4;
-    }
-    [SettingName(DialogIds.TurnBeforeWallkick)]
-    [SettingSubText(DialogIds.TurnBeforeWallkickHint)]
-    public TurnBeforeWallkickSubMenu TurnBeforeWallkick { get; set; } = new();
-
-    // =================================================================================================================
-    [SettingSubMenu]
-    public class ShortWallboostSubMenu {
-        [SettingName(DialogIds.Enabled)]
-        public bool Enabled { get; set; } = true;
-
-        public LintAction Action { get; set; } = LintAction.Kill;
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
-        }
-
-        [SettingRange(1, MaxShortWallboostFrames)]
-        [SettingName(DialogIds.ShortWallboostFrames)]
-        public int Frames { get; set; } = 2;
-    }
-    [SettingName(DialogIds.ShortWallboost)]
-    [SettingSubText(DialogIds.ShortWallboostHint)]
-    public ShortWallboostSubMenu ShortWallboost { get; set; } = new();
-
-    // =================================================================================================================
-    [SettingSubMenu]
-    public class BufferedUltraSubMenu {
-        public BufferedUltraMode Mode { get; set; } = BufferedUltraMode.OnlyWhenMattered;
-        public void CreateModeEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ModeEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.Mode),
-                values: BufferedUltraModeToString,
-                min: (int) BufferedUltraMode.Disabled,
-                max: (int) BufferedUltraMode.Always,
-                value: (int) Mode
-            );
-            ModeEntry.Change(newValue => Mode = (BufferedUltraMode) newValue);
-            subMenu.Add(ModeEntry);
-        }
-
-        public LintAction Action { get; set; } = LintAction.Kill;
-        public void CreateActionEntry(TextMenuExt.SubMenu subMenu, bool inGame) {
-            TextMenu.Slider ActionEntry = new TextMenu.Slider(
-                label: Dialog.Clean(DialogIds.LintAction),
-                values: LintActionToString,
-                min: (int) LintAction.Kill,
-                max: (int) LintAction.Kill,
-                value: (int) Action
-            );
-            ActionEntry.Change(newValue => Action = (LintAction) newValue);
-            subMenu.Add(ActionEntry);
-        }
-    }
-    [SettingName(DialogIds.BufferedUltra)]
-    [SettingSubText(DialogIds.BufferedUltraHint)]
-    public BufferedUltraSubMenu BufferedUltra { get; set; } = new();
-
-    // =================================================================================================================
-    public static string LintActionToString(int action) {
-        switch ((LintAction) action) {
-        case LintAction.Kill:
-            return Dialog.Clean(DialogIds.LintActionKill);
-        }
-        return "";
-    }
-    public static string TransitionDirectionToString(int direction) {
-        switch ((TransitionDirection) direction) {
-        case TransitionDirection.UpOnly:
-            return Dialog.Clean(DialogIds.JumpReleaseExitUp);
-        case TransitionDirection.NotDown:
-            return Dialog.Clean(DialogIds.JumpReleaseExitNotDown);
-        case TransitionDirection.Any:
-            return Dialog.Clean(DialogIds.JumpReleaseExitAny);
-        }
-        return "";
-    }
-    public static string MoveAfterLandModeToString(int mode) {
-        switch ((MoveAfterLandMode) mode) {
-        case MoveAfterLandMode.Disabled:
-            return Dialog.Clean(DialogIds.Off);
-        case MoveAfterLandMode.DashOnly:
-            return Dialog.Clean(DialogIds.MoveAfterLandDashOnly);
-        case MoveAfterLandMode.DashOrJump:
-            return Dialog.Clean(DialogIds.MoveAfterLandDashOrJump);
-        case MoveAfterLandMode.JumpOnly:
-            return Dialog.Clean(DialogIds.MoveAfterLandJumpOnly);
-        }
-        return "";
-    }
-    public static string BufferedUltraModeToString(int mode) {
-        switch ((BufferedUltraMode) mode) {
-        case BufferedUltraMode.Disabled:
-            return Dialog.Clean(DialogIds.Off);
-        case BufferedUltraMode.OnlyWhenMattered:
-            return Dialog.Clean(DialogIds.BufferedUltraOnlyWhenMattered);
-        case BufferedUltraMode.Always:
-            return Dialog.Clean(DialogIds.BufferedUltraAlways);
-        }
-        return "";
+        menu.Add(mainEnable);
+        menu.Add(mainSubMenu);
     }
 }
