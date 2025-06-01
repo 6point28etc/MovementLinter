@@ -59,8 +59,10 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         /// <param name="inGame"> Whether the menu was opened in-game vs from the main menu</param>
         /// <param name="topMenu">The top-level TextMenu containing this submenu</param>
         public RecursiveSubMenu MakeSubMenu(bool inGame, TextMenu topMenu) {
+            TextMenu.Option<ModeT> modeItem = MakeModeMenuItem().Change((ModeT val) => Mode = val);
+            OptionPreview<ModeT> preview    = new(modeItem);
             List<TextMenu.Item> items = [
-                MakeModeMenuItem().Change((ModeT val) => Mode = val),
+                modeItem,
                 new RecursiveOptionSubMenu(
                     label: Dialog.Clean(DialogIds.LintAction),
                     initialMenuSelection: (int) Action,
@@ -71,7 +73,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             ];
             items.AddRange(MakeUniqueMenuItems(inGame));
             items.Add(new TextMenuExt.EaseInSubHeaderExt(Dialog.Clean(hintId), true, topMenu){ HeightExtra = 0f });
-            return new RecursiveSubMenu(label: Dialog.Clean(titleId), items: items);
+            return new RecursiveSubMenu(label: Dialog.Clean(titleId), items: items, preview: preview);
         }
 
         /// <summary>

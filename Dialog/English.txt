@@ -52,7 +52,7 @@ MOVEMENT_LINTER_JUMP_RELEASE_EXIT_UP=        Up Only
 MOVEMENT_LINTER_JUMP_RELEASE_EXIT_NOT_DOWM=  Up or Horizontal
 MOVEMENT_LINTER_JUMP_RELEASE_EXIT_ANY=       Any
 
-MOVEMENT_LINTER_MOVE_AFTER_LAND=               Unbuffered Movement After Landing
+MOVEMENT_LINTER_MOVE_AFTER_LAND=               Unbuffered Move After Landing
 MOVEMENT_LINTER_MOVE_AFTER_LAND_MODE=          Movement Type
 MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_ONLY=     Dash Only
 MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_OR_JUMP=  Dash or Jump
@@ -65,7 +65,7 @@ MOVEMENT_LINTER_MOVE_AFTER_LAND_HINT=          Detects late dash or jump inputs 
                                                after landing to be considered accidental.
 MOVEMENT_LINTER_MOVE_AFTER_LAND_FRAMES=        Frames Late
 
-MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL=        Unbuffered Movement After Gaining Control
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL=        Unbuffered Move After Gaining Control
 MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_HINT=   Detects late dash or jump inputs after gaining control of Madeline.
                                                 The Frames Late setting controls the maximum length of waiting
                                                 after gaining control to be considered accidental.
