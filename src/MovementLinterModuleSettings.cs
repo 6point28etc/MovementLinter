@@ -6,26 +6,51 @@ namespace Celeste.Mod.MovementLinter;
 [SettingName(DialogIds.MovementLinter)]
 public class MovementLinterModuleSettings : EverestModuleSettings {
     // =================================================================================================================
-    public enum LintAction {
+    public enum LintResponse {
+        Tooltip,
         Kill,
-    };
+        SFX,
+    }
+    public enum SFXOption {
+        Caw,
+        BerryEscape,
+        Death,
+        DingDong,
+        Console,
+        BirdBros,
+        Boop,
+        Flag,
+        FishSplode,
+        PicoFlag,
+        Secret,
+        Spring,
+        Kevin,
+        Bumper,
+        Bonk,
+        Hey,
+        GitGud,
+        Uhoh,
+        Alert,
+        OhMyGott,
+        Boom,
+    }
     public enum TransitionDirection {
         None,
         UpOnly,
         NotDown,
         Any,
-    };
+    }
     public enum MoveAfterLandMode {
         Disabled,
         DashOnly,
         DashOrJump,
         JumpOnly,
-    };
+    }
     public enum BufferedUltraMode {
         Disabled,
         OnlyWhenMattered,
-        Always
-    };
+        Always,
+    }
     public const int MaxShortDurationFrames  = 99;
     public const int MaxShortWallboostFrames = 11;
 
@@ -45,7 +70,8 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         private readonly string hintId;
 
         public ModeT Mode { get; set; }
-        public LintAction Action { get; set; } = LintAction.Kill;
+        public LintResponse Response { get; set; } = LintResponse.Tooltip;
+        public SFXOption SFX { get; set; }         = SFXOption.Caw;
 
         public LintRuleSettings(ModeT defaultMode, string titleId, string hintId) {
             this.Mode    = defaultMode;
@@ -61,15 +87,42 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         public RecursiveSubMenu MakeSubMenu(bool inGame, TextMenu topMenu) {
             TextMenu.Option<ModeT> modeItem = MakeModeMenuItem().Change((ModeT val) => Mode = val);
             OptionPreview<ModeT> preview    = new(modeItem);
+
+            TextMenu.Option<SFXOption> SFXSlider = new(Dialog.Clean(DialogIds.LintResponseSFX));
+            SFXSlider.Add(Dialog.Clean(DialogIds.SFXCaw),         SFXOption.Caw,         SFX == SFXOption.Caw)
+                     .Add(Dialog.Clean(DialogIds.SFXBerryEscape), SFXOption.BerryEscape, SFX == SFXOption.BerryEscape)
+                     .Add(Dialog.Clean(DialogIds.SFXDeath),       SFXOption.Death,       SFX == SFXOption.Death)
+                     .Add(Dialog.Clean(DialogIds.SFXDingDong),    SFXOption.DingDong,    SFX == SFXOption.DingDong)
+                     .Add(Dialog.Clean(DialogIds.SFXConsole),     SFXOption.Console,     SFX == SFXOption.Console)
+                     .Add(Dialog.Clean(DialogIds.SFXBirdBros),    SFXOption.BirdBros,    SFX == SFXOption.BirdBros)
+                     .Add(Dialog.Clean(DialogIds.SFXBoop),        SFXOption.Boop,        SFX == SFXOption.Boop)
+                     .Add(Dialog.Clean(DialogIds.SFXFlag),        SFXOption.Flag,        SFX == SFXOption.Flag)
+                     .Add(Dialog.Clean(DialogIds.SFXFishSplode),  SFXOption.FishSplode,  SFX == SFXOption.FishSplode)
+                     .Add(Dialog.Clean(DialogIds.SFXPicoFlag),    SFXOption.PicoFlag,    SFX == SFXOption.PicoFlag)
+                     .Add(Dialog.Clean(DialogIds.SFXSecret),      SFXOption.Secret,      SFX == SFXOption.Secret)
+                     .Add(Dialog.Clean(DialogIds.SFXSpring),      SFXOption.Spring,      SFX == SFXOption.Spring)
+                     .Add(Dialog.Clean(DialogIds.SFXKevin),       SFXOption.Kevin,       SFX == SFXOption.Kevin)
+                     .Add(Dialog.Clean(DialogIds.SFXBumper),      SFXOption.Bumper,      SFX == SFXOption.Bumper)
+                     .Add(Dialog.Clean(DialogIds.SFXBonk),        SFXOption.Bonk,        SFX == SFXOption.Bonk)
+                     .Add(Dialog.Clean(DialogIds.SFXHey),         SFXOption.Hey,         SFX == SFXOption.Hey)
+                     .Add(Dialog.Clean(DialogIds.SFXGitGud),      SFXOption.GitGud,      SFX == SFXOption.GitGud)
+                     .Add(Dialog.Clean(DialogIds.SFXUhoh),        SFXOption.Uhoh,        SFX == SFXOption.Uhoh)
+                     .Add(Dialog.Clean(DialogIds.SFXAlert),       SFXOption.Alert,       SFX == SFXOption.Alert)
+                     .Add(Dialog.Clean(DialogIds.SFXOhMyGott),    SFXOption.OhMyGott,    SFX == SFXOption.OhMyGott)
+                     .Add(Dialog.Clean(DialogIds.SFXBoom),        SFXOption.Boom,        SFX == SFXOption.Boom)
+                     .Change((SFXOption val) => SFX = val);
+
             List<TextMenu.Item> items = [
                 modeItem,
                 new RecursiveOptionSubMenu(
-                    label: Dialog.Clean(DialogIds.LintAction),
-                    initialMenuSelection: (int) Action,
+                    label: Dialog.Clean(DialogIds.LintResponse),
+                    initialMenuSelection: (int) Response,
                     menus: [
-                        new(Dialog.Clean(DialogIds.LintActionKill), [])
+                        new(Dialog.Clean(DialogIds.LintResponseTooltip), []),
+                        new(Dialog.Clean(DialogIds.LintResponseKill), []),
+                        new(Dialog.Clean(DialogIds.LintResponseSFX), [SFXSlider]),
                     ]
-                ).Change((int val) => Action = (LintAction) val)
+                ).Change((int val) => Response = (LintResponse) val)
             ];
             items.AddRange(MakeUniqueMenuItems(inGame));
             items.Add(new TextMenuExt.EaseInSubHeaderExt(Dialog.Clean(hintId), true, topMenu){ HeightExtra = 0f });

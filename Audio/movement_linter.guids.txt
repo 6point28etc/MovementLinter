@@ -1,0 +1,11 @@
+{e19ad546-44b2-434c-9526-6c18d512ec62} event:/movement_linter/alert
+{9aa41b8d-dd0d-439d-bf64-2569f0700c31} event:/movement_linter/bonk
+{edb8ef2d-4b43-4ed4-bd09-74b2e45490f0} event:/movement_linter/boom
+{a054e985-ecbb-44c7-974f-2ef0bcb5aca4} event:/movement_linter/covert_single
+{2ef241f6-80d1-4bc5-b999-edf255f24659} event:/movement_linter/git_gud
+{8edac840-5ef1-4eee-b05e-6fa8f1225314} event:/movement_linter/hey
+{f18e1cc3-6d0d-4ac1-834c-1a526d378ebd} event:/movement_linter/kevin_single
+{f3a0bc21-52b9-44c0-8b2a-86bfdfcb1fc4} event:/movement_linter/omg
+{f0a695c3-64f9-4521-8434-98e2a41c7567} event:/movement_linter/strawberry_escape
+{556aca5d-1169-408b-b8a1-33a10f7266ee} event:/movement_linter/uhoh
+{44574090-94ca-4467-bd70-5bb9bf0e0139} bank:/movement_linter

@@ -7,8 +7,32 @@ public static class DialogIds {
     public const string Mode           = "MOVEMENT_LINTER_MODE";
     public const string None           = "MOVEMENT_LINTER_NONE";
 
-    public const string LintAction     = "MOVEMENT_LINTER_LINT_ACTION";
-    public const string LintActionKill = "MOVEMENT_LINTER_LINT_ACTION_KILL";
+    public const string LintResponse        = "MOVEMENT_LINTER_LINT_RESPONSE";
+    public const string LintResponseTooltip = "MOVEMENT_LINTER_LINT_RESPONSE_TOOLTIP";
+    public const string LintResponseKill    = "MOVEMENT_LINTER_LINT_RESPONSE_KILL";
+    public const string LintResponseSFX     = "MOVEMENT_LINTER_LINT_RESPONSE_SFX";
+
+    public const string SFXCaw         = "MOVEMENT_LINTER_SFX_CAW";
+    public const string SFXBerryEscape = "MOVEMENT_LINTER_SFX_BERRY_ESCAPE";
+    public const string SFXDeath       = "MOVEMENT_LINTER_SFX_DEATH";
+    public const string SFXDingDong    = "MOVEMENT_LINTER_SFX_DING_DONG";
+    public const string SFXConsole     = "MOVEMENT_LINTER_SFX_CONSOLE";
+    public const string SFXBirdBros    = "MOVEMENT_LINTER_SFX_BIRDBROS";
+    public const string SFXBoop        = "MOVEMENT_LINTER_SFX_BOOP";
+    public const string SFXFlag        = "MOVEMENT_LINTER_SFX_FLAG";
+    public const string SFXFishSplode  = "MOVEMENT_LINTER_SFX_FISHSPLODE";
+    public const string SFXPicoFlag    = "MOVEMENT_LINTER_SFX_PICOFLAG";
+    public const string SFXSecret      = "MOVEMENT_LINTER_SFX_SECRET";
+    public const string SFXSpring      = "MOVEMENT_LINTER_SFX_SPRING";
+    public const string SFXKevin       = "MOVEMENT_LINTER_SFX_KEVIN";
+    public const string SFXBumper      = "MOVEMENT_LINTER_SFX_BUMPER";
+    public const string SFXBonk        = "MOVEMENT_LINTER_SFX_BONK";
+    public const string SFXHey         = "MOVEMENT_LINTER_SFX_HEY";
+    public const string SFXGitGud      = "MOVEMENT_LINTER_SFX_GIT_GUD";
+    public const string SFXUhoh        = "MOVEMENT_LINTER_SFX_UHOH";
+    public const string SFXAlert       = "MOVEMENT_LINTER_SFX_ALERT";
+    public const string SFXOhMyGott    = "MOVEMENT_LINTER_SFX_OHMYGOTT";
+    public const string SFXBoom        = "MOVEMENT_LINTER_SFX_BOOM";
 
     public const string JumpReleaseJump       = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP";
     public const string JumpReleaseJumpHint   = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_HINT";

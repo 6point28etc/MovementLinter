@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Celeste.Mod.SpeedrunTool.SaveLoad;
@@ -35,9 +35,6 @@ public class MovementLinterModule : EverestModule {
     private const int BeyondShortDurationFrames = MovementLinterModuleSettings.MaxShortDurationFrames + 1;
     public struct Detection {
         public Detection() {}
-
-        // Lint action handling
-        public bool PendingKill = false;
 
         // Some general extra state tracking
         public int FrameStartPlayerState   = Player.StNormal;
@@ -79,6 +76,9 @@ public class MovementLinterModule : EverestModule {
         public bool UltradLastFrame = false;
     };
     private static Detection det = new(), savedDet;
+
+    // Everything we need to implement the lint responses
+    private static LintResponder res = new();
 
     // =================================================================================================================
     // Load and unload
@@ -189,8 +189,8 @@ public class MovementLinterModule : EverestModule {
                 det.JumpReleaseFrames > 0 &&
                 det.JumpReleaseFrames <= Settings.JumpReleaseJump.Frames &&
                 det.JumpReleaseMatters) {
-            DoLintAction(Settings.JumpReleaseJump,
-                         $"Detected jump press after {det.JumpReleaseFrames}-frame jump release");
+            res.DoLintResponse(Settings.JumpReleaseJump,
+                               $"Detected jump press after {det.JumpReleaseFrames}-frame jump release");
         }
         if (Input.Jump.Check) {
             det.JumpReleaseFrames  = 0;
@@ -226,8 +226,8 @@ public class MovementLinterModule : EverestModule {
 
         // Do the player kill here at the end of the frame so we have a consistent place to do it
         // where we know the player exists
-        if (det.PendingKill) {
-            det.PendingKill = false;
+        if (res.PendingKill) {
+            res.PendingKill = false;
             player.Die(Vector2.Zero, true);
         }
     }
@@ -268,7 +268,7 @@ public class MovementLinterModule : EverestModule {
         // I'm not going to explain all of them, just trust me, this is the right number to use.
         int wallBoostFrames = (int) Math.Round((Player.ClimbJumpBoostTime - player.wallBoostTimer) * 60f) - 1;
         if (wallBoostFrames <= Settings.ShortWallboost.Frames) {
-            DoLintAction(Settings.ShortWallboost, $"Detected {wallBoostFrames}-frame wallboost");
+            res.DoLintResponse(Settings.ShortWallboost, $"Detected {wallBoostFrames}-frame wallboost");
         }
     }
 
@@ -342,7 +342,7 @@ public class MovementLinterModule : EverestModule {
         if (!player.wasOnGround &&
                 ((player.DashDir.X != 0f && player.DashDir.Y > 0f && player.Speed.Y > 0f) ||
                  (Settings.BufferedUltra.Mode == MovementLinterModuleSettings.BufferedUltraMode.Always && det.UltradLastFrame))) {
-            DoLintAction(Settings.BufferedUltra, "Detected buffered ultra");
+            res.DoLintResponse(Settings.BufferedUltra, "Detected buffered ultra");
         }
     }
 
@@ -370,9 +370,9 @@ public class MovementLinterModule : EverestModule {
             if (det.InControlFrames > 0 &&
                     det.InControlFrames <= Settings.MoveAfterGainControl.Frames &&
                     button.bufferCounter == button.BufferTime) {
-                DoLintAction(Settings.MoveAfterGainControl,
-                             $"Detected movement action {det.InControlFrames} " +
-                             $"frame{(det.InControlFrames > 1 ? "s" : "")} late after gaining control");
+                res.DoLintResponse(Settings.MoveAfterGainControl,
+                                   $"Detected movement action {det.InControlFrames} " +
+                                   $"frame{(det.InControlFrames > 1 ? "s" : "")} late after gaining control");
             }
             det.InControlFrames = BeyondShortDurationFrames;
         }
@@ -387,9 +387,9 @@ public class MovementLinterModule : EverestModule {
                 det.FramesAfterLand > 0 &&
                 det.FramesAfterLand <= Settings.MoveAfterLand.Frames &&
                 !(Settings.MoveAfterLand.IgnoreUltras && det.UltradSinceLanding)) {
-            DoLintAction(Settings.MoveAfterLand,
-                         $"Detected jump {det.FramesAfterLand} frame{(det.FramesAfterLand > 1 ? "s" : "")} " +
-                          "late after landing");
+            res.DoLintResponse(Settings.MoveAfterLand,
+                               $"Detected jump {det.FramesAfterLand} frame{(det.FramesAfterLand > 1 ? "s" : "")} " +
+                                "late after landing");
         }
     }
 
@@ -403,9 +403,9 @@ public class MovementLinterModule : EverestModule {
                 Math.Sign(det.FrameStartPlayerSpeed.X) != dir &&
                 !det.LastMoveXWasForward &&
                 det.MoveXFrames <= Settings.TurnBeforeWallkick.Frames) {
-            DoLintAction(Settings.TurnBeforeWallkick,
-                         $"Detected moveX change {det.MoveXFrames} frame{(det.MoveXFrames > 1 ? "s" : "")} " +
-                          "before wallkick");
+            res.DoLintResponse(Settings.TurnBeforeWallkick,
+                               $"Detected moveX change {det.MoveXFrames} frame{(det.MoveXFrames > 1 ? "s" : "")} " +
+                                "before wallkick");
         }
         orig(player, dir);
     }
@@ -417,38 +417,38 @@ public class MovementLinterModule : EverestModule {
                 det.JumpReleaseFrames > 0 &&
                 det.JumpReleaseFrames <= Settings.JumpReleaseDash.Frames &&
                 det.JumpReleaseMatters) {
-            DoLintAction(Settings.JumpReleaseDash,
-                         $"Detected dash after {det.JumpReleaseFrames}-frame jump release");
+            res.DoLintResponse(Settings.JumpReleaseDash,
+                               $"Detected dash after {det.JumpReleaseFrames}-frame jump release");
         }
         if (det.LastFinishedUpdateState == Player.StNormal &&
                 !det.ForceMoveXActive &&
                 !det.LastMoveXWasForward &&
                 det.MoveXFrames <= Settings.ReleaseWBeforeDash.Frames) {
-            DoLintAction(Settings.ReleaseWBeforeDash,
-                         $"Detected moveX change {det.MoveXFrames} frame{(det.MoveXFrames > 1 ? "s" : "")} " +
-                          "before dash");
+            res.DoLintResponse(Settings.ReleaseWBeforeDash,
+                               $"Detected moveX change {det.MoveXFrames} frame{(det.MoveXFrames > 1 ? "s" : "")} " +
+                                "before dash");
         }
         if (det.FastfallCheckedLastFrame &&
                 !det.FirstFastfallInput &&
                 det.FastfallMoveYFrames <= Settings.FastfallGlitchBeforeDash.Frames) {
-            DoLintAction(Settings.FastfallGlitchBeforeDash,
-                         $"Detected fastfall input change {det.FastfallMoveYFrames} " +
-                         $"frame{(det.FastfallMoveYFrames > 1 ? "s" : "")} before dash");
+            res.DoLintResponse(Settings.FastfallGlitchBeforeDash,
+                               $"Detected fastfall input change {det.FastfallMoveYFrames} " +
+                               $"frame{(det.FastfallMoveYFrames > 1 ? "s" : "")} before dash");
         }
         if (((Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.DashOnly) ||
              (Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.DashOrJump)) &&
                 det.FramesAfterLand > 0 &&
                 det.FramesAfterLand <= Settings.MoveAfterLand.Frames) {
-            DoLintAction(Settings.MoveAfterLand,
-                         $"Detected dash {det.FramesAfterLand} frame{(det.FramesAfterLand > 1 ? "s" : "")} " +
-                          "late after landing");
+            res.DoLintResponse(Settings.MoveAfterLand,
+                               $"Detected dash {det.FramesAfterLand} frame{(det.FramesAfterLand > 1 ? "s" : "")} " +
+                                "late after landing");
         }
         int dashLateFramesAfterUpEntry = det.FramesSinceUpTransition - UpEntryDashLockoutFrames;
         if (dashLateFramesAfterUpEntry > 0 &&
                 dashLateFramesAfterUpEntry <= Settings.DashAfterUpEntry.Frames) {
-            DoLintAction(Settings.DashAfterUpEntry,
-                         $"Detected dash {dashLateFramesAfterUpEntry} " +
-                         $"frame{(dashLateFramesAfterUpEntry > 1 ? "s" : "")} late after up transition");
+            res.DoLintResponse(Settings.DashAfterUpEntry,
+                               $"Detected dash {dashLateFramesAfterUpEntry} " +
+                               $"frame{(dashLateFramesAfterUpEntry > 1 ? "s" : "")} late after up transition");
         }
         return orig(player);
     }
@@ -480,28 +480,13 @@ public class MovementLinterModule : EverestModule {
                 det.JumpReleaseFrames <= Settings.JumpReleaseExit.Frames &&
                 det.JumpReleaseMatters &&
                 det.FrameStartPlayerState == Player.StNormal) {
-            DoLintAction(Settings.JumpReleaseExit,
-                         $"Detected room transition after {det.JumpReleaseFrames}-frame jump release");
+            res.DoLintResponse(Settings.JumpReleaseExit,
+                               $"Detected room transition after {det.JumpReleaseFrames}-frame jump release");
         }
         det.JumpReleaseFrames  = BeyondShortDurationFrames;
         det.JumpReleaseMatters = false;
         det.FirstMoveX              = true;
         det.TransitionJustHappened  = true;
         det.FramesSinceUpTransition = (direction.Y == -1) ? 0 : BeyondShortDurationFrames;
-    }
-
-    // =================================================================================================================
-    private static void DoLintAction<ModeT>(MovementLinterModuleSettings.LintRuleSettings<ModeT> lintRuleSettings,
-                                            string explanation) {
-        if (!Settings.Enabled || !lintRuleSettings.IsEnabled()) {
-            return;
-        }
-        switch (lintRuleSettings.Action) {
-        case MovementLinterModuleSettings.LintAction.Kill:
-            // We could be getting called from anywhere, maybe this is a bad time to kill the player
-            // (if the player even exists right now), so just set this flag and we'll handle it in player update.
-            det.PendingKill = true;
-            break;
-        }
     }
 }
