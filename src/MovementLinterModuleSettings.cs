@@ -84,11 +84,13 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         /// </summary>
         /// <param name="inGame"> Whether the menu was opened in-game vs from the main menu</param>
         /// <param name="topMenu">The top-level TextMenu containing this submenu</param>
-        public RecursiveSubMenu MakeSubMenu(bool inGame, TextMenu topMenu) {
-            TextMenu.Option<ModeT> modeItem = MakeModeMenuItem().Change((ModeT val) => Mode = val);
-            OptionPreview<ModeT> preview    = new(modeItem);
+        /// <param name="compactRightWidth">The right-width to use in compact mode</param>
+        public RecursiveSubMenu MakeSubMenu(bool inGame, TextMenu topMenu, float compactRightWidth) {
+            BetterWidthOption<ModeT> modeItem = MakeModeMenuItem();
+            modeItem.Change((ModeT val) => Mode = val);
+            OptionPreview<ModeT> preview = new(modeItem);
 
-            TextMenu.Option<SFXOption> SFXSlider = new(Dialog.Clean(DialogIds.LintResponseSFX));
+            BetterWidthOption<SFXOption> SFXSlider = new(Dialog.Clean(DialogIds.LintResponseSFX));
             SFXSlider.Add(Dialog.Clean(DialogIds.SFXCaw),         SFXOption.Caw,         SFX == SFXOption.Caw)
                      .Add(Dialog.Clean(DialogIds.SFXBerryEscape), SFXOption.BerryEscape, SFX == SFXOption.BerryEscape)
                      .Add(Dialog.Clean(DialogIds.SFXDeath),       SFXOption.Death,       SFX == SFXOption.Death)
@@ -117,6 +119,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                 new RecursiveOptionSubMenu(
                     label: Dialog.Clean(DialogIds.LintResponse),
                     initialMenuSelection: (int) Response,
+                    compactRightWidth: compactRightWidth,
                     menus: [
                         new(Dialog.Clean(DialogIds.LintResponseTooltip), []),
                         new(Dialog.Clean(DialogIds.LintResponseKill), []),
@@ -126,7 +129,8 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             ];
             items.AddRange(MakeUniqueMenuItems(inGame));
             items.Add(new TextMenuExt.EaseInSubHeaderExt(Dialog.Clean(hintId), true, topMenu){ HeightExtra = 0f });
-            return new RecursiveSubMenu(label: Dialog.Clean(titleId), items: items, preview: preview);
+            return new RecursiveSubMenu(label: Dialog.Clean(titleId), compactRightWidth: compactRightWidth,
+                                        items: items, preview: preview);
         }
 
         /// <summary>
@@ -137,7 +141,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         /// <summary>
         ///     Make the menu widget that controls the <see cref="Mode"/> property
         /// </summary>
-        protected abstract TextMenu.Option<ModeT> MakeModeMenuItem();
+        protected abstract BetterWidthOption<ModeT> MakeModeMenuItem();
 
         /// <summary>
         ///     Make any additional menu widgets to control properties not defined in the base class
@@ -154,13 +158,13 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode;
 
-        protected override TextMenu.Option<bool> MakeModeMenuItem() {
-            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        protected override BetterWidthOption<bool> MakeModeMenuItem() {
+            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
-                new TextMenu.Slider(
+                new BetterWidthSlider(
                     label  : Dialog.Clean(DialogIds.JumpReleaseJumpFrames),
                     values : (int val) => val.ToString(),
                     min    : 1,
@@ -180,13 +184,13 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode;
 
-        protected override TextMenu.Option<bool> MakeModeMenuItem() {
-            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        protected override BetterWidthOption<bool> MakeModeMenuItem() {
+            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
-                new TextMenu.Slider(
+                new BetterWidthSlider(
                     label  : Dialog.Clean(DialogIds.JumpReleaseDashFrames),
                     values : (int val) => val.ToString(),
                     min    : 1,
@@ -207,9 +211,9 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode != TransitionDirection.None;
 
-        protected override TextMenu.Option<TransitionDirection> MakeModeMenuItem() {
-            return new TextMenu.Option<TransitionDirection>(Dialog.Clean(DialogIds.JumpReleaseExitDirection))
-                .Add(Dialog.Clean(DialogIds.None), TransitionDirection.None,
+        protected override BetterWidthOption<TransitionDirection> MakeModeMenuItem() {
+            BetterWidthOption<TransitionDirection> item = new(Dialog.Clean(DialogIds.JumpReleaseExitDirection));
+            item.Add(Dialog.Clean(DialogIds.None), TransitionDirection.None,
                      Mode == TransitionDirection.None)
                 .Add(Dialog.Clean(DialogIds.JumpReleaseExitUp), TransitionDirection.UpOnly,
                      Mode == TransitionDirection.UpOnly)
@@ -217,11 +221,12 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                      Mode == TransitionDirection.NotDown)
                 .Add(Dialog.Clean(DialogIds.JumpReleaseExitAny), TransitionDirection.Any,
                      Mode == TransitionDirection.Any);
+            return item;
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
-                new TextMenu.Slider(
+                new BetterWidthSlider(
                     label  : Dialog.Clean(DialogIds.JumpReleaseExitFrames),
                     values : (int val) => val.ToString(),
                     min    : 1,
@@ -243,9 +248,9 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode != MoveAfterLandMode.Disabled;
 
-        protected override TextMenu.Option<MoveAfterLandMode> MakeModeMenuItem() {
-            return new TextMenu.Option<MoveAfterLandMode>(Dialog.Clean(DialogIds.MoveAfterLandMode))
-                .Add(Dialog.Clean(DialogIds.None), MoveAfterLandMode.Disabled,
+        protected override BetterWidthOption<MoveAfterLandMode> MakeModeMenuItem() {
+            BetterWidthOption<MoveAfterLandMode> item = new(Dialog.Clean(DialogIds.MoveAfterLandMode));
+            item.Add(Dialog.Clean(DialogIds.None), MoveAfterLandMode.Disabled,
                      Mode == MoveAfterLandMode.Disabled)
                 .Add(Dialog.Clean(DialogIds.MoveAfterLandDashOnly), MoveAfterLandMode.DashOnly,
                      Mode == MoveAfterLandMode.DashOnly)
@@ -253,13 +258,14 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                      Mode == MoveAfterLandMode.DashOrJump)
                 .Add(Dialog.Clean(DialogIds.MoveAfterLandJumpOnly), MoveAfterLandMode.JumpOnly,
                      Mode == MoveAfterLandMode.JumpOnly);
+            return item;
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
-                new TextMenu.OnOff(Dialog.Clean(DialogIds.MoveAfterLandIgnoreUltras), IgnoreUltras).Change(
+                new BetterWidthOnOff(Dialog.Clean(DialogIds.MoveAfterLandIgnoreUltras), IgnoreUltras).Change(
                     (bool val) => IgnoreUltras = val),
-                new TextMenu.Slider(
+                new BetterWidthSlider(
                     label  : Dialog.Clean(DialogIds.MoveAfterLandFrames),
                     values : (int val) => val.ToString(),
                     min    : 1,
@@ -280,13 +286,13 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode;
 
-        protected override TextMenu.Option<bool> MakeModeMenuItem() {
-            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        protected override BetterWidthOption<bool> MakeModeMenuItem() {
+            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
-                new TextMenu.Slider(
+                new BetterWidthSlider(
                     label  : Dialog.Clean(DialogIds.MoveAfterGainControlFrames),
                     values : (int val) => val.ToString(),
                     min    : 1,
@@ -306,13 +312,13 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode;
 
-        protected override TextMenu.Option<bool> MakeModeMenuItem() {
-            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        protected override BetterWidthOption<bool> MakeModeMenuItem() {
+            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
-                new TextMenu.Slider(
+                new BetterWidthSlider(
                     label  : Dialog.Clean(DialogIds.DashAfterUpEntryFrames),
                     values : (int val) => val.ToString(),
                     min    : 1,
@@ -333,13 +339,13 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode;
 
-        protected override TextMenu.Option<bool> MakeModeMenuItem() {
-            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        protected override BetterWidthOption<bool> MakeModeMenuItem() {
+            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
-                new TextMenu.Slider(
+                new BetterWidthSlider(
                     label  : Dialog.Clean(DialogIds.ReleaseWBeforeDashFrames),
                     values : (int val) => val.ToString(),
                     min    : 1,
@@ -360,13 +366,13 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode;
 
-        protected override TextMenu.Option<bool> MakeModeMenuItem() {
-            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        protected override BetterWidthOption<bool> MakeModeMenuItem() {
+            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
-                new TextMenu.Slider(
+                new BetterWidthSlider(
                     label  : Dialog.Clean(DialogIds.FastfallGlitchBeforeDashFrames),
                     values : (int val) => val.ToString(),
                     min    : 1,
@@ -387,13 +393,13 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode;
 
-        protected override TextMenu.Option<bool> MakeModeMenuItem() {
-            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        protected override BetterWidthOption<bool> MakeModeMenuItem() {
+            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
-                new TextMenu.Slider(
+                new BetterWidthSlider(
                     label  : Dialog.Clean(DialogIds.TurnBeforeWallkickFrames),
                     values : (int val) => val.ToString(),
                     min    : 1,
@@ -413,13 +419,13 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode;
 
-        protected override TextMenu.Option<bool> MakeModeMenuItem() {
-            return new TextMenu.OnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        protected override BetterWidthOption<bool> MakeModeMenuItem() {
+            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
-                new TextMenu.Slider(
+                new BetterWidthSlider(
                     label  : Dialog.Clean(DialogIds.ShortWallboostFrames),
                     values : (int val) => val.ToString(),
                     min    : 1,
@@ -438,14 +444,15 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         public override bool IsEnabled() => Mode != BufferedUltraMode.Disabled;
 
-        protected override TextMenu.Option<BufferedUltraMode> MakeModeMenuItem() {
-            return new TextMenu.Option<BufferedUltraMode>(Dialog.Clean(DialogIds.Mode))
-                .Add(Dialog.Clean(DialogIds.Off), BufferedUltraMode.Disabled,
+        protected override BetterWidthOption<BufferedUltraMode> MakeModeMenuItem() {
+            BetterWidthOption<BufferedUltraMode> item = new(Dialog.Clean(DialogIds.Mode));
+            item.Add(Dialog.Clean(DialogIds.Off), BufferedUltraMode.Disabled,
                      Mode == BufferedUltraMode.Disabled)
                 .Add(Dialog.Clean(DialogIds.BufferedUltraOnlyWhenMattered), BufferedUltraMode.OnlyWhenMattered,
                      Mode == BufferedUltraMode.OnlyWhenMattered)
                 .Add(Dialog.Clean(DialogIds.BufferedUltraAlways), BufferedUltraMode.Always,
                      Mode == BufferedUltraMode.Always);
+            return item;
         }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
@@ -456,24 +463,24 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
     // =================================================================================================================
     public void CreateMenu(TextMenu menu, bool inGame) {
-        TextMenu.OnOff mainEnable         = new(Dialog.Clean(DialogIds.Enabled), Enabled);
-        RecursiveNakedSubMenu mainSubMenu = new(initiallyExpanded: Enabled);
+        BetterWidthOnOff mainEnable       = new(Dialog.Clean(DialogIds.Enabled), Enabled);
+        RecursiveNakedSubMenu mainSubMenu = new(initiallyExpanded: Enabled, compactRightWidth: mainEnable.RightWidth());
         mainEnable.Change((bool val) => {
             Enabled = val;
             mainSubMenu.Expanded = val;
         });
 
-        mainSubMenu.AddItem(JumpReleaseJump.MakeSubMenu(inGame, menu))
-                   .AddItem(JumpReleaseDash.MakeSubMenu(inGame, menu))
-                   .AddItem(JumpReleaseExit.MakeSubMenu(inGame, menu))
-                   .AddItem(MoveAfterLand.MakeSubMenu(inGame, menu))
-                   .AddItem(MoveAfterGainControl.MakeSubMenu(inGame, menu))
-                   .AddItem(DashAfterUpEntry.MakeSubMenu(inGame, menu))
-                   .AddItem(ReleaseWBeforeDash.MakeSubMenu(inGame, menu))
-                   .AddItem(FastfallGlitchBeforeDash.MakeSubMenu(inGame, menu))
-                   .AddItem(TurnBeforeWallkick.MakeSubMenu(inGame, menu))
-                   .AddItem(ShortWallboost.MakeSubMenu(inGame, menu))
-                   .AddItem(BufferedUltra.MakeSubMenu(inGame, menu));
+        mainSubMenu.AddItem(JumpReleaseJump.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
+                   .AddItem(JumpReleaseDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
+                   .AddItem(JumpReleaseExit.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
+                   .AddItem(MoveAfterLand.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
+                   .AddItem(MoveAfterGainControl.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
+                   .AddItem(DashAfterUpEntry.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
+                   .AddItem(ReleaseWBeforeDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
+                   .AddItem(FastfallGlitchBeforeDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
+                   .AddItem(TurnBeforeWallkick.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
+                   .AddItem(ShortWallboost.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
+                   .AddItem(BufferedUltra.MakeSubMenu(inGame, menu, mainEnable.RightWidth()));
 
         menu.Add(mainEnable);
         menu.Add(mainSubMenu);
