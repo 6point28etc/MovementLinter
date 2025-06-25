@@ -11,15 +11,17 @@ public class LintResponder {
     private Random random = new();
 
     public void DoLintResponse<ModeT>(MovementLinterModuleSettings.LintRuleSettings<ModeT> lintRuleSettings,
-                                      string explanation) {
+                                      string singularWarnId, string pluralWarnId, int warnParam) {
         if (!MovementLinterModule.Settings.Enabled || !lintRuleSettings.IsEnabled()) {
             return;
         }
 
+        string warning = (warnParam == 1) ? Dialog.Clean(singularWarnId)
+                                          : string.Format(Dialog.Get(pluralWarnId), warnParam);
+
         switch (lintRuleSettings.Response) {
         case MovementLinterModuleSettings.LintResponse.Tooltip:
-            // TODO make tooltips localizable
-            Tooltip.Show(explanation);
+            Tooltip.Show(warning);
             break;
 
         case MovementLinterModuleSettings.LintResponse.Kill:

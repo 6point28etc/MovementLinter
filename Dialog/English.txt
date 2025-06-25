@@ -51,30 +51,36 @@ MOVEMENT_LINTER_SFX_ALERT=        !
 MOVEMENT_LINTER_SFX_OHMYGOTT=     OMG
 MOVEMENT_LINTER_SFX_BOOM=         🗿
 
-MOVEMENT_LINTER_JUMP_RELEASE_JUMP=        Jump Release Between Jumps
-MOVEMENT_LINTER_JUMP_RELEASE_JUMP_HINT=   Detects unintended jump releases during consecutive jumps.
-                                          Looks for two jump inputs separated by a short release.
-                                          The Jump Release Frames setting controls the maximum duration
-                                          of the release to be considered accidental.
-MOVEMENT_LINTER_JUMP_RELEASE_JUMP_FRAMES= Jump Release Frames
+MOVEMENT_LINTER_JUMP_RELEASE_JUMP=               Jump Release Between Jumps
+MOVEMENT_LINTER_JUMP_RELEASE_JUMP_HINT=          Detects unintended jump releases during consecutive jumps.
+                                                 Looks for two jump inputs separated by a short release.
+                                                 The Jump Release Frames setting controls the maximum duration
+                                                 of the release to be considered accidental.
+MOVEMENT_LINTER_JUMP_RELEASE_JUMP_FRAMES=        Jump Release Frames
+MOVEMENT_LINTER_JUMP_RELEASE_JUMP_WARN_SINGULAR= Detected jump press after 1-frame jump release
+MOVEMENT_LINTER_JUMP_RELEASE_JUMP_WARN_PLURAL=   Detected jump press after {0}-frame jump release
 
-MOVEMENT_LINTER_JUMP_RELEASE_DASH=        Jump Release Before Dash
-MOVEMENT_LINTER_JUMP_RELEASE_DASH_HINT=   Detects unintended jump releases during jump -> dash sequences.
-                                          Looks for a jump input, then a dash input separated by a short jump release.
-                                          The Jump Release Frames setting controls the maximum duration
-                                          of the release to be considered accidental.
-MOVEMENT_LINTER_JUMP_RELEASE_DASH_FRAMES= Jump Release Frames
+MOVEMENT_LINTER_JUMP_RELEASE_DASH=               Jump Release Before Dash
+MOVEMENT_LINTER_JUMP_RELEASE_DASH_HINT=          Detects unintended jump releases during jump -> dash sequences.
+                                                 Looks for a jump input, then a dash input separated by a short jump release.
+                                                 The Jump Release Frames setting controls the maximum duration
+                                                 of the release to be considered accidental.
+MOVEMENT_LINTER_JUMP_RELEASE_DASH_FRAMES=        Jump Release Frames
+MOVEMENT_LINTER_JUMP_RELEASE_DASH_WARN_SINGULAR= Detected dash after 1-frame jump release
+MOVEMENT_LINTER_JUMP_RELEASE_DASH_WARN_PLURAL=   Detected dash after {0}-frame jump release
 
-MOVEMENT_LINTER_JUMP_RELEASE_EXIT=           Jump Release Before Room Exit
-MOVEMENT_LINTER_JUMP_RELEASE_EXIT_HINT=      Detects unintended jump releases before exiting rooms.
-                                             Looks for a screen transition after a short jump release.
-                                             The Jump Release Frames setting controls the maximum duration
-                                             of the release to be considered accidental.
-MOVEMENT_LINTER_JUMP_RELEASE_EXIT_FRAMES=    Jump Release Frames
-MOVEMENT_LINTER_JUMP_RELEASE_EXIT_DIRECTION= Transition Direction
-MOVEMENT_LINTER_JUMP_RELEASE_EXIT_UP=        Up Only
-MOVEMENT_LINTER_JUMP_RELEASE_EXIT_NOT_DOWM=  Up or Horizontal
-MOVEMENT_LINTER_JUMP_RELEASE_EXIT_ANY=       Any
+MOVEMENT_LINTER_JUMP_RELEASE_EXIT=               Jump Release Before Room Exit
+MOVEMENT_LINTER_JUMP_RELEASE_EXIT_HINT=          Detects unintended jump releases before exiting rooms.
+                                                 Looks for a screen transition after a short jump release.
+                                                 The Jump Release Frames setting controls the maximum duration
+                                                 of the release to be considered accidental.
+MOVEMENT_LINTER_JUMP_RELEASE_EXIT_FRAMES=        Jump Release Frames
+MOVEMENT_LINTER_JUMP_RELEASE_EXIT_DIRECTION=     Transition Direction
+MOVEMENT_LINTER_JUMP_RELEASE_EXIT_UP=            Up Only
+MOVEMENT_LINTER_JUMP_RELEASE_EXIT_NOT_DOWM=      Up or Horizontal
+MOVEMENT_LINTER_JUMP_RELEASE_EXIT_ANY=           Any
+MOVEMENT_LINTER_JUMP_RELEASE_EXIT_WARN_SINGULAR= Detected room transition after 1-frame jump release
+MOVEMENT_LINTER_JUMP_RELEASE_EXIT_WARN_PLURAL=   Detected room transition after {0}-frame jump release
 
 MOVEMENT_LINTER_MOVE_AFTER_LAND=               Unbuffered Move After Landing
 MOVEMENT_LINTER_MOVE_AFTER_LAND_MODE=          Movement Type
@@ -88,45 +94,60 @@ MOVEMENT_LINTER_MOVE_AFTER_LAND_HINT=          Detects late dash or jump inputs 
                                                The Frames Late setting controls the maximum length of waiting
                                                after landing to be considered accidental.
 MOVEMENT_LINTER_MOVE_AFTER_LAND_FRAMES=        Frames Late
+MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_SINGULAR= Detected movement action 1 frame late after landing
+MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_PLURAL=   Detected movement action {0} frames late after landing
 
-MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL=        Unbuffered Move After Gaining Control
-MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_HINT=   Detects late dash or jump inputs after gaining control of Madeline.
-                                                The Frames Late setting controls the maximum length of waiting
-                                                after gaining control to be considered accidental.
-MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_FRAMES= Frames Late
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL=               Unbuffered Move After Gaining Control
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_HINT=          Detects late dash or jump inputs after gaining control of Madeline.
+                                                       The Frames Late setting controls the maximum length of waiting
+                                                       after gaining control to be considered accidental.
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_FRAMES=        Frames Late
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_SINGULAR= Detected movement action 1 frame late after gaining control
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_PLURAL=   Detected movement action {0} frames late after gaining control
 
 MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY=        Unbuffered Dash After Up Transition
 MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_HINT=   Detects a late dash at the start of a room after an up transition.
                                             The Frames Late setting controls the maximum length of waiting after
                                             the earliest possible dash to be considered accidental.
 MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_FRAMES= Frames Late
+MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_WARN_SINGULAR= Detected dash 1 frame late after up transition
+MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_WARN_PLURAL=   Detected dash {0} frames late after up transition
 
-MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH=        Release Forward Before Dash
-MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_HINT=   Detects a change in the moveX input before dashing that results in not
-                                              holding forward for a few frames. The Release / Turn Frames setting controls
-                                              the maximum length of the new moveX input to be considered accidental.
-MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_FRAMES= Release / Turn Frames
+MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH=               Release Forward Before Dash
+MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_HINT=          Detects a change in the moveX input before dashing that results in not
+                                                     holding forward for a few frames. The Release / Turn Frames setting controls
+                                                     the maximum length of the new moveX input to be considered accidental.
+MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_FRAMES=        Release / Turn Frames
+MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_WARN_SINGULAR= Detected moveX change 1 frame before dash
+MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_WARN_PLURAL=   Detected moveX change {0} frames before dash
 
-MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH=        Fastfall Change Before Dash
-MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH_HINT=   Detects a short change in the fastfall input before dashing.
-                                                    The Fastfall Change Frames setting controls the maximum length
-                                                    of the new fastfall input to be considered accidental.
-MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH_FRAMES= Fastfall Change Frames
+MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH=               Fastfall Change Before Dash
+MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH_HINT=          Detects a short change in the fastfall input before dashing.
+                                                           The Fastfall Change Frames setting controls the maximum length
+                                                           of the new fastfall input to be considered accidental.
+MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH_FRAMES=        Fastfall Change Frames
+MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH_WARN_SINGULAR= Detected fastfall input change 1 frame before dash
+MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH_WARN_PLURAL=   Detected fastfall input change {0} frames before dash
 
-MOVEMENT_LINTER_TURN_BEFORE_WALLKICK=        Release Forward Before Wallkick
-MOVEMENT_LINTER_TURN_BEFORE_WALLKICK_HINT=   Detects a change in the moveX input while approaching a wall before
-                                             wallkicking that results in not holding forward for a few frames.
-                                             The Release / Turn Frames setting controls the maximum length of
-                                             the new moveX input to be considered accidental.
-MOVEMENT_LINTER_TURN_BEFORE_WALLKICK_FRAMES= Release / Turn Frames
+MOVEMENT_LINTER_TURN_BEFORE_WALLKICK=               Release Forward Before Wallkick
+MOVEMENT_LINTER_TURN_BEFORE_WALLKICK_HINT=          Detects a change in the moveX input while approaching a wall before
+                                                    wallkicking that results in not holding forward for a few frames.
+                                                    The Release / Turn Frames setting controls the maximum length of
+                                                    the new moveX input to be considered accidental.
+MOVEMENT_LINTER_TURN_BEFORE_WALLKICK_FRAMES=        Release / Turn Frames
+MOVEMENT_LINTER_TURN_BEFORE_WALLKICK_WARN_SINGULAR= Detected moveX change 1 frame before wallkick
+MOVEMENT_LINTER_TURN_BEFORE_WALLKICK_WARN_PLURAL=   Detected moveX change {0} frames before wallkick
 
-MOVEMENT_LINTER_SHORT_WALLBOOST=        Short Wallboost
-MOVEMENT_LINTER_SHORT_WALLBOOST_HINT=   Detects a short wallboost (likely meant to be a wallkick).
-                                        The Wallboost Frames setting controls the shortest wallboost to
-                                        be considered accidental.
-MOVEMENT_LINTER_SHORT_WALLBOOST_FRAMES= Wallboost Frames
+MOVEMENT_LINTER_SHORT_WALLBOOST=               Short Wallboost
+MOVEMENT_LINTER_SHORT_WALLBOOST_HINT=          Detects a short wallboost (likely meant to be a wallkick).
+                                               The Wallboost Frames setting controls the shortest wallboost to
+                                               be considered accidental.
+MOVEMENT_LINTER_SHORT_WALLBOOST_FRAMES=        Wallboost Frames
+MOVEMENT_LINTER_SHORT_WALLBOOST_WARN_SINGULAR= Detected 1-frame wallboost
+MOVEMENT_LINTER_SHORT_WALLBOOST_WARN_PLURAL=   Detected {0}-frame wallboost
 
 MOVEMENT_LINTER_BUFFERED_ULTRA=                    Buffered Ultra
 MOVEMENT_LINTER_BUFFERED_ULTRA_HINT=               Detects ultra attempts that buffer the jump when landing on the ground.
 MOVEMENT_LINTER_BUFFERED_ULTRA_ONLY_WHEN_MATTERED= Only Failed Ultras
 MOVEMENT_LINTER_BUFFERED_ULTRA_ALWAYS=             Always
+MOVEMENT_LINTER_BUFFERED_ULTRA_WARN_SINGULAR=      Detected buffered ultra
