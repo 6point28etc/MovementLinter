@@ -1,15 +1,16 @@
 using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 
 namespace Celeste.Mod.MovementLinter;
 
 public class LintResponder {
-    /// <summary>
-    /// True if we should kill Madeline at the next available opportunity
-    /// </summary>
-    public bool PendingKill = false;
+    private bool pendingKill = false;
+    private Queue<string> pendingTooltips = [];
 
     private Random random = new();
 
+    // =================================================================================================================
     public void DoLintResponse<ModeT>(MovementLinterModuleSettings.LintRuleSettings<ModeT> lintRuleSettings,
                                       string singularWarnId, string pluralWarnId, int warnParam) {
         if (!MovementLinterModule.Settings.Enabled || !lintRuleSettings.IsEnabled()) {
@@ -21,13 +22,12 @@ public class LintResponder {
 
         switch (lintRuleSettings.Response) {
         case MovementLinterModuleSettings.LintResponse.Tooltip:
-            Tooltip.Show(warning);
+            pendingTooltips.Enqueue(warning);
             break;
-
         case MovementLinterModuleSettings.LintResponse.Kill:
             // We could be getting called from anywhere, maybe this is a bad time to kill the player
             // (if the player even exists right now), so just set this flag and we'll handle it in player update.
-            PendingKill = true;
+            pendingKill = true;
             break;
 
         case MovementLinterModuleSettings.LintResponse.SFX:
@@ -119,6 +119,20 @@ public class LintResponder {
                 break;
             }
             break;
+        }
+    }
+
+    // =================================================================================================================
+    public void ProcessPendingResponses(Player player) {
+        // If we're killing Madeline, wait to do any other responses until we get polled again after she respawns
+        if (pendingKill) {
+            player.Die(Vector2.Zero, true);
+            pendingKill = false;
+            return;
+        }
+
+        while (pendingTooltips.Count != 0) {
+            Tooltip.Show(pendingTooltips.Dequeue());
         }
     }
 }

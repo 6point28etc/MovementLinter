@@ -224,12 +224,8 @@ public class MovementLinterModule : EverestModule {
         // Fastfall
         det.FastfallCheckedLastFrame = det.FastfallCheckedThisFrame;
 
-        // Do the player kill here at the end of the frame so we have a consistent place to do it
-        // where we know the player exists
-        if (res.PendingKill) {
-            res.PendingKill = false;
-            player.Die(Vector2.Zero, true);
-        }
+        // Poll any responses that need or want the player to exist or that have something to do every frame
+        res.ProcessPendingResponses(player);
     }
 
     // =================================================================================================================

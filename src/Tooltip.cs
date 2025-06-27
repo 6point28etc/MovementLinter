@@ -23,24 +23,30 @@
  */
 
 using System.Collections;
-using System.Linq;
 using Celeste.Mod.SpeedrunTool.SaveLoad;
 using Microsoft.Xna.Framework;
 using Monocle;
 
 namespace Celeste.Mod.MovementLinter;
 
-[Tracked]
 public class Tooltip : Entity {
+    // 0 bits indicate slots that are currently filled, 1 bits indicate empty slots.
+    private static uint freeHeightsMask = 0xFFFF_FFFF;
+
     private const int Padding = 25;
     private readonly string message;
+    private readonly float shownDurationSeconds;
+    private readonly int heightIndex;
     private float alpha;
     private float unEasedAlpha;
 
-    private Tooltip(string message) {
-        this.message = message;
-        Vector2 messageSize = ActiveFont.Measure(message);
-        Position = new(Padding, Engine.Height - messageSize.Y - Padding / 2f);
+    private Tooltip(string message, float shownDurationSeconds, int heightIndex) {
+        freeHeightsMask &= (uint) ~(1 << heightIndex);
+        this.message              = message;
+        this.shownDurationSeconds = shownDurationSeconds;
+        this.heightIndex          = heightIndex;
+        Position                  = new(Padding,
+                                        Engine.Height - (heightIndex + 1) * (ActiveFont.LineHeight + Padding / 2f));
         Tag = Tags.HUD | Tags.Global | Tags.FrozenUpdate | Tags.PauseUpdate| Tags.TransitionUpdate;
         Add(new Coroutine(Show()));
         Add(new IgnoreSaveLoadComponent());
@@ -57,13 +63,14 @@ public class Tooltip : Entity {
     }
 
     private IEnumerator Dismiss() {
-        yield return 1f;
+        yield return shownDurationSeconds;
         while (alpha > 0f) {
             unEasedAlpha = Calc.Approach(unEasedAlpha, 0f, Engine.RawDeltaTime * 5f);
-            alpha = Ease.SineIn(unEasedAlpha);
+            alpha        = Ease.SineIn(unEasedAlpha);
             yield return null;
         }
 
+        freeHeightsMask |= (uint) 1 << heightIndex;
         RemoveSelf();
     }
 
@@ -73,13 +80,16 @@ public class Tooltip : Entity {
             Color.Black * alpha * alpha * alpha);
     }
 
-    public static void Show(string message) {
-        if (Engine.Scene is {} scene) {
-            if (!scene.Tracker.Entities.TryGetValue(typeof(Tooltip), out var tooltips)) {
-                tooltips = scene.Entities.FindAll<Tooltip>().Cast<Entity>().ToList();
+    public static void Show(string message, float shownDurationSeconds = 2f) {
+        // If there are already 32 tooltips on screen, there's no room to show this one anyway, so just don't
+        if (Engine.Scene is {} scene && freeHeightsMask != 0) {
+            // Software-implement ffs since c# sucks. There are bithacking ways to do this
+            // but they're cursed and we should be dealing with small numbers so whatever
+            int heightIndex = 0;
+            while ((freeHeightsMask & (1 << heightIndex)) == 0) {
+                ++heightIndex;
             }
-            tooltips.ForEach(entity => entity.RemoveSelf());
-            scene.Add(new Tooltip(message));
+            scene.Add(new Tooltip(message, shownDurationSeconds, heightIndex));
         }
     }
 }
