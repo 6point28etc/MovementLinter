@@ -8,8 +8,16 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     // =================================================================================================================
     public enum LintResponse {
         Tooltip,
+        Dialog,
         Kill,
         SFX,
+    }
+    public enum CharacterOption {
+        Madeline,
+        Badeline,
+        Granny,
+        Theo,
+        Oshiro,
     }
     public enum SFXOption {
         Caw,
@@ -70,8 +78,9 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         private readonly string hintId;
 
         public ModeT Mode { get; set; }
-        public LintResponse Response { get; set; } = LintResponse.Tooltip;
-        public SFXOption SFX { get; set; }         = SFXOption.Caw;
+        public LintResponse Response { get; set; }           = LintResponse.Tooltip;
+        public CharacterOption DialogCharacter { get; set; } = CharacterOption.Madeline;
+        public SFXOption SFX { get; set; }                   = SFXOption.Caw;
 
         public LintRuleSettings(ModeT defaultMode, string titleId, string hintId) {
             this.Mode    = defaultMode;
@@ -89,6 +98,14 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             BetterWidthOption<ModeT> modeItem = MakeModeMenuItem();
             modeItem.Change((ModeT val) => Mode = val);
             OptionPreview<ModeT> preview = new(modeItem);
+
+            BetterWidthOption<CharacterOption> CharacterSlider = new(Dialog.Clean(DialogIds.CharacterSelect));
+            CharacterSlider.Add(Dialog.Clean(DialogIds.Madeline), CharacterOption.Madeline, DialogCharacter == CharacterOption.Madeline)
+                           .Add(Dialog.Clean(DialogIds.Badeline), CharacterOption.Badeline, DialogCharacter == CharacterOption.Badeline)
+                           .Add(Dialog.Clean(DialogIds.Granny),   CharacterOption.Granny,   DialogCharacter == CharacterOption.Granny)
+                           .Add(Dialog.Clean(DialogIds.Theo),     CharacterOption.Theo,     DialogCharacter == CharacterOption.Theo)
+                           .Add(Dialog.Clean(DialogIds.Oshiro),   CharacterOption.Oshiro,   DialogCharacter == CharacterOption.Oshiro)
+                           .Change((CharacterOption val) => DialogCharacter = val);
 
             BetterWidthOption<SFXOption> SFXSlider = new(Dialog.Clean(DialogIds.LintResponseSFX));
             SFXSlider.Add(Dialog.Clean(DialogIds.SFXCaw),         SFXOption.Caw,         SFX == SFXOption.Caw)
@@ -122,6 +139,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                     compactRightWidth: compactRightWidth,
                     menus: [
                         new(Dialog.Clean(DialogIds.LintResponseTooltip), []),
+                        new(Dialog.Clean(DialogIds.LintResponseDialog), [CharacterSlider]),
                         new(Dialog.Clean(DialogIds.LintResponseKill), []),
                         new(Dialog.Clean(DialogIds.LintResponseSFX), [SFXSlider]),
                     ]

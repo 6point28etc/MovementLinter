@@ -9,8 +9,23 @@ public static class DialogIds {
 
     public const string LintResponse        = "MOVEMENT_LINTER_LINT_RESPONSE";
     public const string LintResponseTooltip = "MOVEMENT_LINTER_LINT_RESPONSE_TOOLTIP";
+    public const string LintResponseDialog  = "MOVEMENT_LINTER_LINT_RESPONSE_DIALOG";
     public const string LintResponseKill    = "MOVEMENT_LINTER_LINT_RESPONSE_KILL";
     public const string LintResponseSFX     = "MOVEMENT_LINTER_LINT_RESPONSE_SFX";
+
+    public const string CharacterSelect = "MOVEMENT_LINTER_CHARACTER_SELECT";
+    public const string Madeline        = "MOVEMENT_LINTER_MADELINE";
+    public const string Badeline        = "MOVEMENT_LINTER_BADELINE";
+    public const string Granny          = "MOVEMENT_LINTER_GRANNY";
+    public const string Theo            = "MOVEMENT_LINTER_THEO";
+    public const string Oshiro          = "MOVEMENT_LINTER_OSHIRO";
+
+    // Portrait names don't need to get localized
+    public const string MadelinePortrait = "{portrait MADELINE distracted}";
+    public const string BadelinePortrait = "{portrait BADELINE freakA}";
+    public const string GrannyPortrait   = "{portrait GRANNY mock}";
+    public const string TheoPortrait     = "{portrait THEO thinking}";
+    public const string OshiroPortrait   = "{portrait OSHIRO worried}";
 
     public const string SFXCaw         = "MOVEMENT_LINTER_SFX_CAW";
     public const string SFXBerryEscape = "MOVEMENT_LINTER_SFX_BERRY_ESCAPE";

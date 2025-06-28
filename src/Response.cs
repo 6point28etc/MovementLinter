@@ -7,6 +7,7 @@ namespace Celeste.Mod.MovementLinter;
 public class LintResponder {
     private bool pendingKill = false;
     private Queue<string> pendingTooltips = [];
+    private Queue<string> pendingDialog = [];
 
     private Random random = new();
 
@@ -23,6 +24,17 @@ public class LintResponder {
         switch (lintRuleSettings.Response) {
         case MovementLinterModuleSettings.LintResponse.Tooltip:
             pendingTooltips.Enqueue(warning);
+            break;
+        case MovementLinterModuleSettings.LintResponse.Dialog:
+            string portrait = lintRuleSettings.DialogCharacter switch {
+                MovementLinterModuleSettings.CharacterOption.Madeline => DialogIds.MadelinePortrait,
+                MovementLinterModuleSettings.CharacterOption.Badeline => DialogIds.BadelinePortrait,
+                MovementLinterModuleSettings.CharacterOption.Granny   => DialogIds.GrannyPortrait,
+                MovementLinterModuleSettings.CharacterOption.Theo     => DialogIds.TheoPortrait,
+                MovementLinterModuleSettings.CharacterOption.Oshiro   => DialogIds.OshiroPortrait,
+                _ => "c# is dumb"
+            };
+            pendingDialog.Enqueue(portrait + warning);
             break;
         case MovementLinterModuleSettings.LintResponse.Kill:
             // We could be getting called from anywhere, maybe this is a bad time to kill the player
@@ -133,6 +145,11 @@ public class LintResponder {
 
         while (pendingTooltips.Count != 0) {
             Tooltip.Show(pendingTooltips.Dequeue());
+        }
+        while (pendingDialog.Count != 0) {
+            // This can cause multiple dialogs to talk over each other. I don't want to space them out temporally
+            // (since then I'm throwing a warning long after the actual detection) and it's funny, so I allow it.
+            player.Scene.Add(new CustomMiniTextbox(pendingDialog.Dequeue()));
         }
     }
 }
