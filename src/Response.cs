@@ -1,13 +1,31 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Mono.Cecil.Cil;
+using Monocle;
+using MonoMod.Cil;
 
 namespace Celeste.Mod.MovementLinter;
 
 public class LintResponder {
-    private bool pendingKill = false;
-    private Queue<string> pendingTooltips = [];
-    private Queue<string> pendingDialog = [];
+    public static LintResponder Instance = new();
+    private LintResponder() {}
+
+    // Response queues. Some of these may not be strictly necessary given how the responses work,
+    // but I like having  them as a general system.
+    private bool pendingKill                 = false;
+    private Queue<string> pendingTooltips    = [];
+    private Queue<string> pendingDialog      = [];
+    private Queue<Color> pendingSpriteColors = [];
+    private Queue<Color> pendingHairColors   = [];
+
+    // Sprite color state
+    private int spriteColorTimer = 0;
+    private Color spriteColor    = Color.White;
+
+    // Hair color state
+    private int hairColorTimer = 0;
+    private Color hairColor    = Color.White;
 
     private Random random = new();
 
@@ -131,6 +149,16 @@ public class LintResponder {
                 break;
             }
             break;
+
+        case MovementLinterModuleSettings.LintResponse.SpriteColor:
+            pendingSpriteColors.Enqueue(ColorOptionToColor(lintRuleSettings.SpriteColor,
+                                                           lintRuleSettings.CustomSpriteColor));
+            break;
+        
+        case MovementLinterModuleSettings.LintResponse.HairColor:
+            pendingHairColors.Enqueue(ColorOptionToColor(lintRuleSettings.HairColor,
+                                                         lintRuleSettings.CustomHairColor));
+            break;
         }
     }
 
@@ -151,5 +179,64 @@ public class LintResponder {
             // (since then I'm throwing a warning long after the actual detection) and it's funny, so I allow it.
             player.Scene.Add(new CustomMiniTextbox(pendingDialog.Dequeue()));
         }
+        if (pendingSpriteColors.Count != 0) {
+            // Cut short any existing color response when we get a new one
+            spriteColorTimer = 30;
+            spriteColor      = pendingSpriteColors.Dequeue();
+        }
+        if (pendingHairColors.Count != 0) {
+            // Cut short any existing color response when we get a new one
+            hairColorTimer = 30;
+            hairColor      = pendingHairColors.Dequeue();
+        }
+    }
+
+    // =================================================================================================================
+    // Player render patches
+    public static void PatchPlayerRender (ILContext il) {
+        ILCursor cursor = new(il);
+
+        // Vanilla hair color is set from Update rather than Render, so just set it first thing
+        cursor.Emit(OpCodes.Ldarg_0);
+        cursor.EmitDelegate<Action<Player>>(SetHairColor);
+
+        // Override sprite color after vanilla sets it
+        cursor.GotoNext(MoveType.After,
+                        instr => instr.MatchCall(typeof(Color), "get_White"),
+                        instr => instr.MatchStfld(typeof(GraphicsComponent), "Color"),
+                        instr => instr.OpCode == OpCodes.Ldarg_0);
+        cursor.Emit(OpCodes.Ldarg_0);
+        cursor.EmitDelegate<Action<Player>>(SetSpriteColor);
+    }
+
+    private static void SetHairColor(Player player) {
+        if (Instance.hairColorTimer > 0) {
+            --Instance.hairColorTimer;
+            player.Hair.Color = Instance.hairColor;
+        }
+    }
+
+    private static void SetSpriteColor(Player player) {
+        if (Instance.spriteColorTimer > 0) {
+            --Instance.spriteColorTimer;
+            player.Sprite.Color = Instance.spriteColor;
+        }
+    }
+
+    // =================================================================================================================
+    private static Color ColorOptionToColor(MovementLinterModuleSettings.ColorOption color, string customHexCode) {
+        return color switch {
+            MovementLinterModuleSettings.ColorOption.Red    => Calc.HexToColor("ff0000"),
+            MovementLinterModuleSettings.ColorOption.Green  => Calc.HexToColor("00ff00"),
+            MovementLinterModuleSettings.ColorOption.Blue   => Calc.HexToColor("0000ff"),
+            MovementLinterModuleSettings.ColorOption.Purple => Calc.HexToColor("8000ff"),
+            MovementLinterModuleSettings.ColorOption.Orange => Calc.HexToColor("ff8000"),
+            MovementLinterModuleSettings.ColorOption.Yellow => Calc.HexToColor("ffff00"),
+            MovementLinterModuleSettings.ColorOption.White  => Calc.HexToColor("ffffff"),
+            MovementLinterModuleSettings.ColorOption.Gray   => Calc.HexToColor("808080"),
+            MovementLinterModuleSettings.ColorOption.Black  => Calc.HexToColor("000000"),
+            MovementLinterModuleSettings.ColorOption.Custom => Calc.HexToColor(customHexCode),
+            _ => Color.White,
+        };
     }
 }

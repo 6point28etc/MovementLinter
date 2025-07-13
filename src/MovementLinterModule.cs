@@ -78,7 +78,7 @@ public class MovementLinterModule : EverestModule {
     private static Detection det = new(), savedDet;
 
     // Everything we need to implement the lint responses
-    private static LintResponder res = new();
+    private static LintResponder res = LintResponder.Instance;
 
     // =================================================================================================================
     // Load and unload
@@ -107,6 +107,8 @@ public class MovementLinterModule : EverestModule {
         if (speedrunToolIsLoaded) {
             AddSaveLoadAction();
         }
+
+        IL.Celeste.Player.Render += LintResponder.PatchPlayerRender;
     }
 
     public override void Unload() {
@@ -130,6 +132,8 @@ public class MovementLinterModule : EverestModule {
         if (speedrunToolIsLoaded) {
             RemoveSaveLoadAction();
         }
+
+        IL.Celeste.Player.Render -= LintResponder.PatchPlayerRender;
     }
 
     // =================================================================================================================

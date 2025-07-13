@@ -7,11 +7,13 @@ public static class DialogIds {
     public const string Mode           = "MOVEMENT_LINTER_MODE";
     public const string None           = "MOVEMENT_LINTER_NONE";
 
-    public const string LintResponse        = "MOVEMENT_LINTER_LINT_RESPONSE";
-    public const string LintResponseTooltip = "MOVEMENT_LINTER_LINT_RESPONSE_TOOLTIP";
-    public const string LintResponseDialog  = "MOVEMENT_LINTER_LINT_RESPONSE_DIALOG";
-    public const string LintResponseKill    = "MOVEMENT_LINTER_LINT_RESPONSE_KILL";
-    public const string LintResponseSFX     = "MOVEMENT_LINTER_LINT_RESPONSE_SFX";
+    public const string LintResponse            = "MOVEMENT_LINTER_RESPONSE";
+    public const string LintResponseTooltip     = "MOVEMENT_LINTER_RESPONSE_TOOLTIP";
+    public const string LintResponseDialog      = "MOVEMENT_LINTER_RESPONSE_DIALOG";
+    public const string LintResponseKill        = "MOVEMENT_LINTER_RESPONSE_KILL";
+    public const string LintResponseSFX         = "MOVEMENT_LINTER_RESPONSE_SFX";
+    public const string LintResponseSpriteColor = "MOVEMENT_LINTER_RESPONSE_SPRITE_COLOR";
+    public const string LintResponseHairColor   = "MOVEMENT_LINTER_RESPONSE_HAIR_COLOR";
 
     public const string CharacterSelect = "MOVEMENT_LINTER_CHARACTER_SELECT";
     public const string Madeline        = "MOVEMENT_LINTER_MADELINE";
@@ -27,6 +29,7 @@ public static class DialogIds {
     public const string TheoPortrait     = "{portrait THEO thinking}";
     public const string OshiroPortrait   = "{portrait OSHIRO worried}";
 
+    public const string SFXSelect      = "MOVEMENT_LINTER_SFX_SELECT";
     public const string SFXCaw         = "MOVEMENT_LINTER_SFX_CAW";
     public const string SFXBerryEscape = "MOVEMENT_LINTER_SFX_BERRY_ESCAPE";
     public const string SFXDeath       = "MOVEMENT_LINTER_SFX_DEATH";
@@ -48,6 +51,21 @@ public static class DialogIds {
     public const string SFXAlert       = "MOVEMENT_LINTER_SFX_ALERT";
     public const string SFXOhMyGott    = "MOVEMENT_LINTER_SFX_OHMYGOTT";
     public const string SFXBoom        = "MOVEMENT_LINTER_SFX_BOOM";
+
+    public const string ColorSelect = "MOVEMENT_LINTER_COLOR_SELECT";
+    public const string Red         = "MOVEMENT_LINTER_RED";
+    public const string Green       = "MOVEMENT_LINTER_GREEN";
+    public const string Blue        = "MOVEMENT_LINTER_BLUE";
+    public const string Purple      = "MOVEMENT_LINTER_PURPLE";
+    public const string Orange      = "MOVEMENT_LINTER_ORANGE";
+    public const string Yellow      = "MOVEMENT_LINTER_YELLOW";
+    public const string White       = "MOVEMENT_LINTER_WHITE";
+    public const string Gray        = "MOVEMENT_LINTER_GRAY";
+    public const string Black       = "MOVEMENT_LINTER_BLACK";
+
+    public const string CustomColorHint   = "MOVEMENT_LINTER_CUSTOM_COLOR_HINT";
+    public const string SpriteColorHeader = "MOVEMENT_LINTER_SPRITE_COLOR_HEADER";
+    public const string HairColorHeader   = "MOVEMENT_LINTER_HAIR_COLOR_HEADER";
 
     public const string JumpReleaseJump             = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP";
     public const string JumpReleaseJumpHint         = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_HINT";

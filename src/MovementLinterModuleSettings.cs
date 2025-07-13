@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Celeste.Mod.TextMenuLib;
 
 namespace Celeste.Mod.MovementLinter;
@@ -11,6 +12,8 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         Dialog,
         Kill,
         SFX,
+        SpriteColor,
+        HairColor,
     }
     public enum CharacterOption {
         Madeline,
@@ -41,6 +44,18 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         Alert,
         OhMyGott,
         Boom,
+    }
+    public enum ColorOption {
+        Red,
+        Green,
+        Blue,
+        Purple,
+        Orange,
+        Yellow,
+        White,
+        Gray,
+        Black,
+        Custom,
     }
     public enum TransitionDirection {
         None,
@@ -81,6 +96,10 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         public LintResponse Response { get; set; }           = LintResponse.Tooltip;
         public CharacterOption DialogCharacter { get; set; } = CharacterOption.Madeline;
         public SFXOption SFX { get; set; }                   = SFXOption.Caw;
+        public ColorOption SpriteColor { get; set; }         = ColorOption.Red;
+        public string CustomSpriteColor { get; set; }        = "6487ed";
+        public ColorOption HairColor { get; set; }           = ColorOption.Green;
+        public string CustomHairColor { get; set; }          = "6487ed";
 
         public LintRuleSettings(ModeT defaultMode, string titleId, string hintId) {
             this.Mode    = defaultMode;
@@ -99,16 +118,20 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             modeItem.Change((ModeT val) => Mode = val);
             OptionPreview<ModeT> preview = new(modeItem);
 
-            BetterWidthOption<CharacterOption> CharacterSlider = new(Dialog.Clean(DialogIds.CharacterSelect));
-            CharacterSlider.Add(Dialog.Clean(DialogIds.Madeline), CharacterOption.Madeline, DialogCharacter == CharacterOption.Madeline)
+            RecursiveOptionSubMenu responseMenu = new(label: Dialog.Clean(DialogIds.LintResponse),
+                                                      initialMenuSelection: (int) Response,
+                                                      compactRightWidth: compactRightWidth);
+
+            BetterWidthOption<CharacterOption> characterSlider = new(Dialog.Clean(DialogIds.CharacterSelect));
+            characterSlider.Add(Dialog.Clean(DialogIds.Madeline), CharacterOption.Madeline, DialogCharacter == CharacterOption.Madeline)
                            .Add(Dialog.Clean(DialogIds.Badeline), CharacterOption.Badeline, DialogCharacter == CharacterOption.Badeline)
                            .Add(Dialog.Clean(DialogIds.Granny),   CharacterOption.Granny,   DialogCharacter == CharacterOption.Granny)
                            .Add(Dialog.Clean(DialogIds.Theo),     CharacterOption.Theo,     DialogCharacter == CharacterOption.Theo)
                            .Add(Dialog.Clean(DialogIds.Oshiro),   CharacterOption.Oshiro,   DialogCharacter == CharacterOption.Oshiro)
                            .Change((CharacterOption val) => DialogCharacter = val);
 
-            BetterWidthOption<SFXOption> SFXSlider = new(Dialog.Clean(DialogIds.LintResponseSFX));
-            SFXSlider.Add(Dialog.Clean(DialogIds.SFXCaw),         SFXOption.Caw,         SFX == SFXOption.Caw)
+            BetterWidthOption<SFXOption> sfxSlider = new(Dialog.Clean(DialogIds.SFXSelect));
+            sfxSlider.Add(Dialog.Clean(DialogIds.SFXCaw),         SFXOption.Caw,         SFX == SFXOption.Caw)
                      .Add(Dialog.Clean(DialogIds.SFXBerryEscape), SFXOption.BerryEscape, SFX == SFXOption.BerryEscape)
                      .Add(Dialog.Clean(DialogIds.SFXDeath),       SFXOption.Death,       SFX == SFXOption.Death)
                      .Add(Dialog.Clean(DialogIds.SFXDingDong),    SFXOption.DingDong,    SFX == SFXOption.DingDong)
@@ -131,19 +154,77 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                      .Add(Dialog.Clean(DialogIds.SFXBoom),        SFXOption.Boom,        SFX == SFXOption.Boom)
                      .Change((SFXOption val) => SFX = val);
 
+            BetterWidthOption<ColorOption> spriteColorSlider = new(Dialog.Clean(DialogIds.ColorSelect));
+            ParentAwareEaseInSubHeader customSpriteColorHint = new(Dialog.Clean(DialogIds.CustomColorHint),
+                                                                   SpriteColor == ColorOption.Custom,
+                                                                   topMenu, responseMenu){ HeightExtra = 0f };
+            spriteColorSlider.Add(Dialog.Clean(DialogIds.Red),    ColorOption.Red,    SpriteColor == ColorOption.Red)
+                             .Add(Dialog.Clean(DialogIds.Green),  ColorOption.Green,  SpriteColor == ColorOption.Green)
+                             .Add(Dialog.Clean(DialogIds.Blue),   ColorOption.Blue,   SpriteColor == ColorOption.Blue)
+                             .Add(Dialog.Clean(DialogIds.Purple), ColorOption.Purple, SpriteColor == ColorOption.Purple)
+                             .Add(Dialog.Clean(DialogIds.Orange), ColorOption.Orange, SpriteColor == ColorOption.Orange)
+                             .Add(Dialog.Clean(DialogIds.Gray),   ColorOption.Gray,   SpriteColor == ColorOption.Gray)
+                             .Add(Dialog.Clean(DialogIds.Black),  ColorOption.Black,  SpriteColor == ColorOption.Black)
+                             .Add("#" + CustomSpriteColor,        ColorOption.Custom, SpriteColor == ColorOption.Custom)
+                             .Change((ColorOption val) => {
+                                         SpriteColor                       = val;
+                                         customSpriteColorHint.FadeVisible = (val == ColorOption.Custom);
+                                     });
+            ColorEntryPage customSpritePage = new(topMenu, responseMenu, Dialog.Clean(DialogIds.SpriteColorHeader));
+            spriteColorSlider.Pressed(delegate {
+                if (spriteColorSlider.Index == spriteColorSlider.Values.Count - 1) {
+                    Audio.Play(global::Celeste.SFX.ui_main_button_select);
+                    customSpritePage.Enter();
+                }
+            });
+            customSpritePage.OnAccept = (string val) => {
+                CustomSpriteColor = val;
+                spriteColorSlider.Values[spriteColorSlider.Values.Count - 1] =
+                    new("#" + val, spriteColorSlider.Values.Last().Item2);
+            };
+
+            BetterWidthOption<ColorOption> hairColorSlider = new(Dialog.Clean(DialogIds.ColorSelect));
+            ParentAwareEaseInSubHeader customHairColorHint = new(Dialog.Clean(DialogIds.CustomColorHint),
+                                                                 HairColor == ColorOption.Custom,
+                                                                 topMenu, responseMenu){ HeightExtra = 0f };
+            hairColorSlider.Add(Dialog.Clean(DialogIds.Red),    ColorOption.Red,    HairColor == ColorOption.Red)
+                           .Add(Dialog.Clean(DialogIds.Green),  ColorOption.Green,  HairColor == ColorOption.Green)
+                           .Add(Dialog.Clean(DialogIds.Blue),   ColorOption.Blue,   HairColor == ColorOption.Blue)
+                           .Add(Dialog.Clean(DialogIds.Purple), ColorOption.Purple, HairColor == ColorOption.Purple)
+                           .Add(Dialog.Clean(DialogIds.Orange), ColorOption.Orange, HairColor == ColorOption.Orange)
+                           .Add(Dialog.Clean(DialogIds.Yellow), ColorOption.Yellow, HairColor == ColorOption.Yellow)
+                           .Add(Dialog.Clean(DialogIds.White),  ColorOption.White,  HairColor == ColorOption.White)
+                           .Add(Dialog.Clean(DialogIds.Gray),   ColorOption.Gray,   HairColor == ColorOption.Gray)
+                           .Add(Dialog.Clean(DialogIds.Black),  ColorOption.Black,  HairColor == ColorOption.Black)
+                           .Add("#" + CustomHairColor,          ColorOption.Custom, HairColor == ColorOption.Custom)
+                           .Change((ColorOption val) => {
+                                       HairColor                       = val;
+                                       customHairColorHint.FadeVisible = (val == ColorOption.Custom);
+                                   });
+            ColorEntryPage customHairPage = new(topMenu, responseMenu, Dialog.Clean(DialogIds.HairColorHeader));
+            hairColorSlider.Pressed(delegate {
+                if (hairColorSlider.Index == hairColorSlider.Values.Count - 1) {
+                    Audio.Play(global::Celeste.SFX.ui_main_button_select);
+                    customHairPage.Enter();
+                }
+            });
+            customHairPage.OnAccept = (string val) => {
+                CustomHairColor = val;
+                hairColorSlider.Values[hairColorSlider.Values.Count - 1] =
+                    new("#" + val, hairColorSlider.Values.Last().Item2);
+            };
+
             List<TextMenu.Item> items = [
                 modeItem,
-                new RecursiveOptionSubMenu(
-                    label: Dialog.Clean(DialogIds.LintResponse),
-                    initialMenuSelection: (int) Response,
-                    compactRightWidth: compactRightWidth,
-                    menus: [
-                        new(Dialog.Clean(DialogIds.LintResponseTooltip), []),
-                        new(Dialog.Clean(DialogIds.LintResponseDialog), [CharacterSlider]),
-                        new(Dialog.Clean(DialogIds.LintResponseKill), []),
-                        new(Dialog.Clean(DialogIds.LintResponseSFX), [SFXSlider]),
-                    ]
-                ).Change((int val) => Response = (LintResponse) val)
+                responseMenu.AddMenu(Dialog.Clean(DialogIds.LintResponseTooltip), [])
+                            .AddMenu(Dialog.Clean(DialogIds.LintResponseDialog), [characterSlider])
+                            .AddMenu(Dialog.Clean(DialogIds.LintResponseKill), [])
+                            .AddMenu(Dialog.Clean(DialogIds.LintResponseSFX), [sfxSlider])
+                            .AddMenu(Dialog.Clean(DialogIds.LintResponseSpriteColor), [spriteColorSlider,
+                                                                                       customSpriteColorHint])
+                            .AddMenu(Dialog.Clean(DialogIds.LintResponseHairColor), [hairColorSlider,
+                                                                                     customHairColorHint])
+                            .Change((int val) => Response = (LintResponse) val)
             ];
             items.AddRange(MakeUniqueMenuItems(inGame));
             items.Add(new TextMenuExt.EaseInSubHeaderExt(Dialog.Clean(hintId), true, topMenu){ HeightExtra = 0f });
