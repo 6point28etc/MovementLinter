@@ -14,6 +14,7 @@ public static class DialogIds {
     public const string LintResponseSFX         = "MOVEMENT_LINTER_RESPONSE_SFX";
     public const string LintResponseSpriteColor = "MOVEMENT_LINTER_RESPONSE_SPRITE_COLOR";
     public const string LintResponseHairColor   = "MOVEMENT_LINTER_RESPONSE_HAIR_COLOR";
+    public const string LintResponseHiccup      = "MOVEMENT_LINTER_RESPONSE_HICCUP";
 
     public const string CharacterSelect = "MOVEMENT_LINTER_CHARACTER_SELECT";
     public const string Madeline        = "MOVEMENT_LINTER_MADELINE";

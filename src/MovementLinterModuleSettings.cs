@@ -14,6 +14,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         SFX,
         SpriteColor,
         HairColor,
+        Hiccup,
     }
     public enum CharacterOption {
         Madeline,
@@ -224,6 +225,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                                                                                        customSpriteColorHint])
                             .AddMenu(Dialog.Clean(DialogIds.LintResponseHairColor), [hairColorSlider,
                                                                                      customHairColorHint])
+                            .AddMenu(Dialog.Clean(DialogIds.LintResponseHiccup), [])
                             .Change((int val) => Response = (LintResponse) val)
             ];
             items.AddRange(MakeUniqueMenuItems(inGame));

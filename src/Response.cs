@@ -18,6 +18,7 @@ public class LintResponder {
     private Queue<string> pendingDialog      = [];
     private Queue<Color> pendingSpriteColors = [];
     private Queue<Color> pendingHairColors   = [];
+    private bool pendingHiccup               = false;
 
     // Sprite color state
     private int spriteColorTimer = 0;
@@ -159,6 +160,10 @@ public class LintResponder {
             pendingHairColors.Enqueue(ColorOptionToColor(lintRuleSettings.HairColor,
                                                          lintRuleSettings.CustomHairColor));
             break;
+
+        case MovementLinterModuleSettings.LintResponse.Hiccup:
+            pendingHiccup = true;
+            break;
         }
     }
 
@@ -188,6 +193,10 @@ public class LintResponder {
             // Cut short any existing color response when we get a new one
             hairColorTimer = 30;
             hairColor      = pendingHairColors.Dequeue();
+        }
+        if (pendingHiccup) {
+            player.HiccupJump();
+            pendingHiccup = false;
         }
     }
 
