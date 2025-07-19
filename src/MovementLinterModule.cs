@@ -108,7 +108,12 @@ public class MovementLinterModule : EverestModule {
             AddSaveLoadAction();
         }
 
-        IL.Celeste.Player.Render += LintResponder.PatchPlayerRender;
+        // Mods for response. Keeping everything in one big list here rather than splitting things out because I want to
+        // easily tell if there's a conflict / double-mod of a method.
+        IL.Celeste.Player.Render                  += LintResponder.PatchPlayerRender;
+        On.Celeste.BadelineOldsite.CanChangeMusic += LintResponder.OnBadelineOldsiteCanChangeMusic;
+        IL.Celeste.BadelineOldsite.Added          += LintResponder.PatchBadelineOldsiteAdded;
+        On.Celeste.Level.LoadLevel                += LintResponder.OnLevelLoadLevel;
     }
 
     public override void Unload() {
@@ -133,7 +138,10 @@ public class MovementLinterModule : EverestModule {
             RemoveSaveLoadAction();
         }
 
-        IL.Celeste.Player.Render -= LintResponder.PatchPlayerRender;
+        IL.Celeste.Player.Render                  -= LintResponder.PatchPlayerRender;
+        On.Celeste.BadelineOldsite.CanChangeMusic -= LintResponder.OnBadelineOldsiteCanChangeMusic;
+        IL.Celeste.BadelineOldsite.Added          -= LintResponder.PatchBadelineOldsiteAdded;
+        On.Celeste.Level.LoadLevel                -= LintResponder.OnLevelLoadLevel;
     }
 
     // =================================================================================================================

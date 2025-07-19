@@ -15,6 +15,7 @@ public static class DialogIds {
     public const string LintResponseSpriteColor = "MOVEMENT_LINTER_RESPONSE_SPRITE_COLOR";
     public const string LintResponseHairColor   = "MOVEMENT_LINTER_RESPONSE_HAIR_COLOR";
     public const string LintResponseHiccup      = "MOVEMENT_LINTER_RESPONSE_HICCUP";
+    public const string LintResponseHazard      = "MOVEMENT_LINTER_RESPONSE_HAZARD";
 
     public const string CharacterSelect = "MOVEMENT_LINTER_CHARACTER_SELECT";
     public const string Madeline        = "MOVEMENT_LINTER_MADELINE";
@@ -67,6 +68,12 @@ public static class DialogIds {
     public const string CustomColorHint   = "MOVEMENT_LINTER_CUSTOM_COLOR_HINT";
     public const string SpriteColorHeader = "MOVEMENT_LINTER_SPRITE_COLOR_HEADER";
     public const string HairColorHeader   = "MOVEMENT_LINTER_HAIR_COLOR_HEADER";
+
+    public const string HazardSelect   = "MOVEMENT_LINTER_HAZARD_SELECT";
+    public const string BadelineChaser = "MOVEMENT_LINTER_HAZARD_BADELINE_CHASER";
+    public const string AngryOshiro    = "MOVEMENT_LINTER_HAZARD_ANGRY_OSHIRO";
+    public const string Snowball       = "MOVEMENT_LINTER_HAZARD_SNOWBALL";
+    public const string Seeker         = "MOVEMENT_LINTER_HAZARD_SEEKER";
 
     public const string JumpReleaseJump             = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP";
     public const string JumpReleaseJumpHint         = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_HINT";

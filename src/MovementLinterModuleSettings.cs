@@ -15,6 +15,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         SpriteColor,
         HairColor,
         Hiccup,
+        Hazard,
     }
     public enum CharacterOption {
         Madeline,
@@ -57,6 +58,12 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         Gray,
         Black,
         Custom,
+    }
+    public enum HazardOption {
+        BadelineChaser,
+        Oshiro,
+        Snowball,
+        Seeker,
     }
     public enum TransitionDirection {
         None,
@@ -101,6 +108,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         public string CustomSpriteColor { get; set; }        = "6487ed";
         public ColorOption HairColor { get; set; }           = ColorOption.Green;
         public string CustomHairColor { get; set; }          = "6487ed";
+        public HazardOption Hazard { get; set; }             = HazardOption.BadelineChaser;
 
         public LintRuleSettings(ModeT defaultMode, string titleId, string hintId) {
             this.Mode    = defaultMode;
@@ -119,10 +127,12 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             modeItem.Change((ModeT val) => Mode = val);
             OptionPreview<ModeT> preview = new(modeItem);
 
+            // Set up the response submenu first since some items need access to it
             RecursiveOptionSubMenu responseMenu = new(label: Dialog.Clean(DialogIds.LintResponse),
                                                       initialMenuSelection: (int) Response,
                                                       compactRightWidth: compactRightWidth);
 
+            // Dialog
             BetterWidthOption<CharacterOption> characterSlider = new(Dialog.Clean(DialogIds.CharacterSelect));
             characterSlider.Add(Dialog.Clean(DialogIds.Madeline), CharacterOption.Madeline, DialogCharacter == CharacterOption.Madeline)
                            .Add(Dialog.Clean(DialogIds.Badeline), CharacterOption.Badeline, DialogCharacter == CharacterOption.Badeline)
@@ -131,6 +141,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                            .Add(Dialog.Clean(DialogIds.Oshiro),   CharacterOption.Oshiro,   DialogCharacter == CharacterOption.Oshiro)
                            .Change((CharacterOption val) => DialogCharacter = val);
 
+            // SFX
             BetterWidthOption<SFXOption> sfxSlider = new(Dialog.Clean(DialogIds.SFXSelect));
             sfxSlider.Add(Dialog.Clean(DialogIds.SFXCaw),         SFXOption.Caw,         SFX == SFXOption.Caw)
                      .Add(Dialog.Clean(DialogIds.SFXBerryEscape), SFXOption.BerryEscape, SFX == SFXOption.BerryEscape)
@@ -155,6 +166,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                      .Add(Dialog.Clean(DialogIds.SFXBoom),        SFXOption.Boom,        SFX == SFXOption.Boom)
                      .Change((SFXOption val) => SFX = val);
 
+            // Sprite color
             BetterWidthOption<ColorOption> spriteColorSlider = new(Dialog.Clean(DialogIds.ColorSelect));
             ParentAwareEaseInSubHeader customSpriteColorHint = new(Dialog.Clean(DialogIds.CustomColorHint),
                                                                    SpriteColor == ColorOption.Custom,
@@ -184,6 +196,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                     new("#" + val, spriteColorSlider.Values.Last().Item2);
             };
 
+            // Hair color
             BetterWidthOption<ColorOption> hairColorSlider = new(Dialog.Clean(DialogIds.ColorSelect));
             ParentAwareEaseInSubHeader customHairColorHint = new(Dialog.Clean(DialogIds.CustomColorHint),
                                                                  HairColor == ColorOption.Custom,
@@ -215,6 +228,15 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                     new("#" + val, hairColorSlider.Values.Last().Item2);
             };
 
+            // Hazards
+            BetterWidthOption<HazardOption> hazardSlider = new(Dialog.Clean(DialogIds.HazardSelect));
+            hazardSlider.Add(Dialog.Clean(DialogIds.BadelineChaser), HazardOption.BadelineChaser, Hazard == HazardOption.BadelineChaser)
+                        .Add(Dialog.Clean(DialogIds.AngryOshiro),    HazardOption.Oshiro,         Hazard == HazardOption.Oshiro)
+                        .Add(Dialog.Clean(DialogIds.Snowball),       HazardOption.Snowball,       Hazard == HazardOption.Snowball)
+                        .Add(Dialog.Clean(DialogIds.Seeker),         HazardOption.Seeker,         Hazard == HazardOption.Seeker)
+                        .Change((HazardOption val) => Hazard = val);
+
+            // Add all responses to the response menu, then make the submenu for the whole lint rule
             List<TextMenu.Item> items = [
                 modeItem,
                 responseMenu.AddMenu(Dialog.Clean(DialogIds.LintResponseTooltip), [])
@@ -226,6 +248,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                             .AddMenu(Dialog.Clean(DialogIds.LintResponseHairColor), [hairColorSlider,
                                                                                      customHairColorHint])
                             .AddMenu(Dialog.Clean(DialogIds.LintResponseHiccup), [])
+                            .AddMenu(Dialog.Clean(DialogIds.LintResponseHazard), [hazardSlider])
                             .Change((int val) => Response = (LintResponse) val)
             ];
             items.AddRange(MakeUniqueMenuItems(inGame));

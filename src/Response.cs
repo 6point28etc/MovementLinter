@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using Monocle;
@@ -19,6 +20,7 @@ public class LintResponder {
     private Queue<Color> pendingSpriteColors = [];
     private Queue<Color> pendingHairColors   = [];
     private bool pendingHiccup               = false;
+    private Queue<MovementLinterModuleSettings.HazardOption> pendingHazards = [];
 
     // Sprite color state
     private int spriteColorTimer = 0;
@@ -27,6 +29,9 @@ public class LintResponder {
     // Hair color state
     private int hairColorTimer = 0;
     private Color hairColor    = Color.White;
+
+    // Hazard state
+    private int badelineChaserIdx = 0;
 
     private Random random = new();
 
@@ -164,6 +169,10 @@ public class LintResponder {
         case MovementLinterModuleSettings.LintResponse.Hiccup:
             pendingHiccup = true;
             break;
+
+        case MovementLinterModuleSettings.LintResponse.Hazard:
+            pendingHazards.Enqueue(lintRuleSettings.Hazard);
+            break;
         }
     }
 
@@ -198,6 +207,28 @@ public class LintResponder {
             player.HiccupJump();
             pendingHiccup = false;
         }
+        while (pendingHazards.Count != 0) {
+            switch (pendingHazards.Dequeue()) {
+            case MovementLinterModuleSettings.HazardOption.BadelineChaser:
+                EntityData entityData = new();
+                entityData.Values     = new() {{ "canChangeMusic", false }};
+                player.level.Add(new BadelineOldsite(entityData, player.Position, badelineChaserIdx++));
+                break;
+            case MovementLinterModuleSettings.HazardOption.Oshiro:
+                player.level.Add(new AngryOshiro(
+                    new Vector2(player.level.Bounds.Left - 32,
+                                player.level.Bounds.Top + player.level.Bounds.Height / 2),
+                    false));
+                break;
+            case MovementLinterModuleSettings.HazardOption.Snowball:
+                player.level.Add(new Snowball());
+                break;
+            case MovementLinterModuleSettings.HazardOption.Seeker:
+                player.GetChasePosition(player.level.TimeActive, 1f, out Player.ChaserState chaseState);
+                player.level.Add(new Seeker(chaseState.Position, []));
+                break;
+            }
+        }
     }
 
     // =================================================================================================================
@@ -230,6 +261,51 @@ public class LintResponder {
             --Instance.spriteColorTimer;
             player.Sprite.Color = Instance.spriteColor;
         }
+    }
+
+    // =================================================================================================================
+    // Badeline chaser mods
+    public static bool OnBadelineOldsiteCanChangeMusic(On.Celeste.BadelineOldsite.orig_CanChangeMusic orig,
+                                                       BadelineOldsite chaser, bool val) {
+        // Vanilla chasers always default to true, so if canChangeMusic is false I know I should respect it
+        if (!chaser.canChangeMusic) {
+            return false;
+        }
+        // Otherwise, use the Everest behavior which leaves vanilla levels untouched. I never set canChangeMusic to true
+        // so no need to force that in vanilla.
+        return orig(chaser, val);
+    }
+
+    public static void PatchBadelineOldsiteAdded(ILContext il) {
+        // Vanilla does some room and session-based checks to start the Badeline intro cutscene and force-remove
+        // chasers. Everest overrides this to always act normal in non-vanilla levels. I want to always act normal for
+        // chasers I've spawned, so I check canChangeMusic as a hacky way to identify my chasers (since I always set it
+        // to false), then default to the Everest behavior. Have to do this in IL rather than just hooking it because
+        // C# sucks.
+        ILCursor cursor = new(il);
+
+        // Before checking if the level is a vanilla one, check canChangeMusic
+        cursor.GotoNext(MoveType.Before, instr => instr.OpCode == OpCodes.Ldloc_0);
+        cursor.Emit(OpCodes.Ldarg_0);
+        cursor.Emit(OpCodes.Ldfld, typeof(BadelineOldsite).GetField("canChangeMusic",
+                                                                    BindingFlags.NonPublic | BindingFlags.Instance));
+
+        // Find the call to Entity::Added, which is the first step of the branch that avoids orig_Added
+        ILCursor branchToCursor = cursor.Clone();
+        branchToCursor.GotoNext(MoveType.Before,
+                                instr => instr.OpCode == OpCodes.Ldarg_0,
+                                instr => instr.OpCode == OpCodes.Ldarg_1,
+                                instr => instr.MatchCall(typeof(Entity), "Added"));
+
+        // Branch to the non-orig_Added path if canChangeMusic is false
+        cursor.Emit(OpCodes.Brfalse_S, branchToCursor.Next);
+    }
+
+    // =================================================================================================================
+    public static void OnLevelLoadLevel(On.Celeste.Level.orig_LoadLevel orig, Level level,
+                                        Player.IntroTypes playerIntro, bool isFromLoader) {
+        orig(level, playerIntro, isFromLoader);
+        Instance.badelineChaserIdx = 0;
     }
 
     // =================================================================================================================
