@@ -264,17 +264,20 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         /// <param name="compactRightWidth">The right-width to use in compact mode</param>
         public RecursiveSubMenu MakeSubMenu(bool inGame, TextMenu topMenu, float compactRightWidth,
                                             bool memorialTextEnabled) {
-            // Mode and preview thereof
+            // Hint, mode, mode preview
+            TextMenuExt.EaseInSubHeaderExt ruleHint = new(Dialog.Clean(hintId), true, topMenu){ HeightExtra = 0f };
             BetterWidthOption<ModeT> modeItem = MakeModeMenuItem();
             modeItem.Change((ModeT val) => Mode = val);
             OptionPreview<ModeT> modePreview = new(modeItem);
-            List<TextMenu.Item> menuItems    = [
-                modeItem,
-            ];
-            
+
             // Make the submenu now since we need to manipulate it from the response items
             RecursiveSubMenu ruleMenu = new(label: Dialog.Clean(titleId), compactRightWidth: compactRightWidth,
                                             preview: modePreview);
+            ruleMenu.AddItem(ruleHint)
+                    .AddItem(modeItem);
+            foreach (TextMenu.Item item in MakeUniqueMenuItems(inGame)) {
+                ruleMenu.AddItem(item);
+            }
 
             // Make add response button and the hint that goes with it, don't add them yet
             TextMenu.Button addResponseButton = new(Dialog.Clean(DialogIds.AddResponse)){
@@ -291,7 +294,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                 RecursiveOptionSubMenu responseMenu = response.MakeSubMenu(inGame, topMenu, compactRightWidth,
                                                                            memorialTextEnabled);
                 SetDeleteResponseBind(response, responseMenu, ruleMenu, addResponseButton, removeResponseHint);
-                menuItems.Add(responseMenu);
+                ruleMenu.AddItem(responseMenu);
             };
 
             // Callback to add a response and its menu
@@ -319,17 +322,9 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             });
 
             // Add the add response button and its hint after all the responses
-            menuItems.Add(addResponseButton);
-            menuItems.Add(removeResponseHint);
+            ruleMenu.AddItem(addResponseButton);
+            ruleMenu.AddItem(removeResponseHint);
 
-            // Per-rule items, hint
-            menuItems.AddRange(MakeUniqueMenuItems(inGame));
-            menuItems.Add(new TextMenuExt.EaseInSubHeaderExt(Dialog.Clean(hintId), true, topMenu){ HeightExtra = 0f });
-
-            // Add all items to the menu
-            foreach (TextMenu.Item item in menuItems) {
-                ruleMenu.AddItem(item);
-            }
             return ruleMenu;
         }
 
