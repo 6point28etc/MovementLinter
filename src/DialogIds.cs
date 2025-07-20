@@ -7,15 +7,16 @@ public static class DialogIds {
     public const string Mode           = "MOVEMENT_LINTER_MODE";
     public const string None           = "MOVEMENT_LINTER_NONE";
 
-    public const string LintResponse            = "MOVEMENT_LINTER_RESPONSE";
-    public const string LintResponseTooltip     = "MOVEMENT_LINTER_RESPONSE_TOOLTIP";
-    public const string LintResponseDialog      = "MOVEMENT_LINTER_RESPONSE_DIALOG";
-    public const string LintResponseKill        = "MOVEMENT_LINTER_RESPONSE_KILL";
-    public const string LintResponseSFX         = "MOVEMENT_LINTER_RESPONSE_SFX";
-    public const string LintResponseSpriteColor = "MOVEMENT_LINTER_RESPONSE_SPRITE_COLOR";
-    public const string LintResponseHairColor   = "MOVEMENT_LINTER_RESPONSE_HAIR_COLOR";
-    public const string LintResponseHiccup      = "MOVEMENT_LINTER_RESPONSE_HICCUP";
-    public const string LintResponseHazard      = "MOVEMENT_LINTER_RESPONSE_HAZARD";
+    public const string LintResponse             = "MOVEMENT_LINTER_RESPONSE";
+    public const string LintResponseTooltip      = "MOVEMENT_LINTER_RESPONSE_TOOLTIP";
+    public const string LintResponseDialog       = "MOVEMENT_LINTER_RESPONSE_DIALOG";
+    public const string LintResponseKill         = "MOVEMENT_LINTER_RESPONSE_KILL";
+    public const string LintResponseSFX          = "MOVEMENT_LINTER_RESPONSE_SFX";
+    public const string LintResponseSpriteColor  = "MOVEMENT_LINTER_RESPONSE_SPRITE_COLOR";
+    public const string LintResponseHairColor    = "MOVEMENT_LINTER_RESPONSE_HAIR_COLOR";
+    public const string LintResponseHiccup       = "MOVEMENT_LINTER_RESPONSE_HICCUP";
+    public const string LintResponseHazard       = "MOVEMENT_LINTER_RESPONSE_HAZARD";
+    public const string LintResponseMemorialText = "MOVEMENT_LINTER_RESPONSE_MEMORIAL_TEXT";
 
     public const string CharacterSelect = "MOVEMENT_LINTER_CHARACTER_SELECT";
     public const string Madeline        = "MOVEMENT_LINTER_MADELINE";

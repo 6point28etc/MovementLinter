@@ -16,6 +16,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         HairColor,
         Hiccup,
         Hazard,
+        MemorialTextOption,
     }
     public enum CharacterOption {
         Madeline,
@@ -84,9 +85,11 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
     public const int MaxShortDurationFrames  = 99;
     public const int MaxShortWallboostFrames = 11;
+    public const int MemorialTextThreshold   = 3;
 
     // =================================================================================================================
-    public bool Enabled { get; set; } = true;
+    public bool Enabled { get; set; }             = true;
+    public bool MemorialTextEnabled { get; set; } = false;
 
     // =================================================================================================================
     public class LintResponse {
@@ -100,7 +103,8 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         public HazardOption Hazard { get; set; }             = HazardOption.BadelineChaser;
 
         // -------------------------------------------------------------------------------------------------------------
-        public RecursiveOptionSubMenu MakeSubMenu(bool inGame, TextMenu topMenu, float compactRightWidth) {
+        public RecursiveOptionSubMenu MakeSubMenu(bool inGame, TextMenu topMenu, float compactRightWidth,
+                                                  bool memorialTextEnabled) {
             // Make the response menu first since some items need access to it
             RecursiveOptionSubMenu responseMenu = new(label: Dialog.Clean(DialogIds.LintResponse),
                                                       initialMenuSelection: (int) Option,
@@ -220,8 +224,11 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                         .AddMenu(Dialog.Clean(DialogIds.LintResponseHairColor), [hairColorSlider,
                                                                                  customHairColorHint])
                         .AddMenu(Dialog.Clean(DialogIds.LintResponseHiccup), [])
-                        .AddMenu(Dialog.Clean(DialogIds.LintResponseHazard), [hazardSlider])
-                        .Change((int val) => Option = (LintResponseOption) val);
+                        .AddMenu(Dialog.Clean(DialogIds.LintResponseHazard), [hazardSlider]);
+            if (memorialTextEnabled) {
+                responseMenu.AddMenu(Dialog.Clean(DialogIds.LintResponseMemorialText), []);
+            }
+            responseMenu.Change((int val) => Option = (LintResponseOption) val);
             return responseMenu;
         }
     }
@@ -255,7 +262,8 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         /// <param name="inGame"> Whether the menu was opened in-game vs from the main menu</param>
         /// <param name="topMenu">The top-level TextMenu containing this submenu</param>
         /// <param name="compactRightWidth">The right-width to use in compact mode</param>
-        public RecursiveSubMenu MakeSubMenu(bool inGame, TextMenu topMenu, float compactRightWidth) {
+        public RecursiveSubMenu MakeSubMenu(bool inGame, TextMenu topMenu, float compactRightWidth,
+                                            bool memorialTextEnabled) {
             // Mode and preview thereof
             BetterWidthOption<ModeT> modeItem = MakeModeMenuItem();
             modeItem.Change((ModeT val) => Mode = val);
@@ -280,7 +288,8 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
             // Make and add response menus for the existing responses from the existing settings
             foreach (LintResponse response in Responses) {
-                RecursiveOptionSubMenu responseMenu = response.MakeSubMenu(inGame, topMenu, compactRightWidth);
+                RecursiveOptionSubMenu responseMenu = response.MakeSubMenu(inGame, topMenu, compactRightWidth,
+                                                                           memorialTextEnabled);
                 SetDeleteResponseBind(response, responseMenu, ruleMenu, addResponseButton, removeResponseHint);
                 menuItems.Add(responseMenu);
             };
@@ -294,7 +303,8 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                 }
                 LintResponse newResponse = new();
                 Responses.Add(newResponse);
-                RecursiveOptionSubMenu newResponseMenu = newResponse.MakeSubMenu(inGame, topMenu, compactRightWidth);
+                RecursiveOptionSubMenu newResponseMenu = newResponse.MakeSubMenu(inGame, topMenu, compactRightWidth,
+                                                                                 memorialTextEnabled);
                 SetDeleteResponseBind(newResponse, newResponseMenu, ruleMenu, addResponseButton, removeResponseHint);
                 ruleMenu.InsertItem(ruleMenu.CurrentMenu.IndexOf(addResponseButton), newResponseMenu, true,
                                     (TextMenu.Item item) => {
@@ -678,17 +688,17 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             mainSubMenu.Expanded = val;
         });
 
-        mainSubMenu.AddItem(JumpReleaseJump.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
-                   .AddItem(JumpReleaseDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
-                   .AddItem(JumpReleaseExit.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
-                   .AddItem(MoveAfterLand.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
-                   .AddItem(MoveAfterGainControl.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
-                   .AddItem(DashAfterUpEntry.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
-                   .AddItem(ReleaseWBeforeDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
-                   .AddItem(FastfallGlitchBeforeDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
-                   .AddItem(TurnBeforeWallkick.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
-                   .AddItem(ShortWallboost.MakeSubMenu(inGame, menu, mainEnable.RightWidth()))
-                   .AddItem(BufferedUltra.MakeSubMenu(inGame, menu, mainEnable.RightWidth()));
+        mainSubMenu.AddItem(JumpReleaseJump.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(JumpReleaseDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(JumpReleaseExit.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(MoveAfterLand.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(MoveAfterGainControl.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(DashAfterUpEntry.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(ReleaseWBeforeDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(FastfallGlitchBeforeDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(TurnBeforeWallkick.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(ShortWallboost.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(BufferedUltra.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled));
 
         menu.Add(mainEnable);
         menu.Add(mainSubMenu);

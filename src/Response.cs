@@ -33,7 +33,9 @@ public class LintResponder {
     // Hazard state
     private int badelineChaserIdx = 0;
 
-    private Random random = new();
+    private Random random           = new();
+    private int memorialTextCounter = 0;
+    private bool memorialTextDrawn  = false;
 
     // =================================================================================================================
     public void DoLintResponses<ModeT>(MovementLinterModuleSettings.LintRuleSettings<ModeT> lintRuleSettings,
@@ -45,6 +47,9 @@ public class LintResponder {
                                           : string.Format(Dialog.Get(pluralWarnId), warnParam);
         foreach (MovementLinterModuleSettings.LintResponse response in lintRuleSettings.Responses) {
             DoLintResponse(response, warning);
+        }
+        if (++memorialTextCounter >= MovementLinterModuleSettings.MemorialTextThreshold) {
+            MovementLinterModule.Settings.MemorialTextEnabled = true;
         }
     }
 
@@ -177,11 +182,62 @@ public class LintResponder {
         case MovementLinterModuleSettings.LintResponseOption.Hazard:
             pendingHazards.Enqueue(response.Hazard);
             break;
+
+        case MovementLinterModuleSettings.LintResponseOption.MemorialTextOption:
+            if (memorialTextDrawn) {
+                break;
+            }
+            MovementLinterModuleSettings.LintResponse r = new();
+
+            r.Option = MovementLinterModuleSettings.LintResponseOption.Tooltip;
+            DoLintResponse(r, warning);
+
+            r.Option = MovementLinterModuleSettings.LintResponseOption.Dialog;
+            foreach (MovementLinterModuleSettings.CharacterOption character in
+                         Enum.GetValues(typeof(MovementLinterModuleSettings.CharacterOption))) {
+                r.DialogCharacter = character;
+                DoLintResponse(r, warning);
+            }
+
+            r.Option = MovementLinterModuleSettings.LintResponseOption.Kill;
+            DoLintResponse(r, warning);
+
+            r.Option = MovementLinterModuleSettings.LintResponseOption.SFX;
+            foreach (MovementLinterModuleSettings.SFXOption sfx in
+                         Enum.GetValues(typeof(MovementLinterModuleSettings.SFXOption))) {
+                r.SFX = sfx;
+                DoLintResponse(r, warning);
+            }
+
+            r.Option            = MovementLinterModuleSettings.LintResponseOption.SpriteColor;
+            r.SpriteColor       = MovementLinterModuleSettings.ColorOption.Custom;
+            r.CustomSpriteColor = $"{random.Next(0x100):X2}{random.Next(0x100):X2}{random.Next(0x100):X2}";
+            DoLintResponse(r, warning);
+
+            r.Option          = MovementLinterModuleSettings.LintResponseOption.HairColor;
+            r.HairColor       = MovementLinterModuleSettings.ColorOption.Custom;
+            r.CustomHairColor = $"{random.Next(0x100):X2}{random.Next(0x100):X2}{random.Next(0x100):X2}";
+            DoLintResponse(r, warning);
+
+            r.Option = MovementLinterModuleSettings.LintResponseOption.Hiccup;
+            DoLintResponse(r, warning);
+
+            r.Option = MovementLinterModuleSettings.LintResponseOption.Hazard;
+            foreach (MovementLinterModuleSettings.HazardOption hazard in
+                         Enum.GetValues(typeof(MovementLinterModuleSettings.HazardOption))) {
+                r.Hazard = hazard;
+                DoLintResponse(r, warning);
+            }
+
+            memorialTextDrawn = true;
+            break;
         }
     }
 
     // =================================================================================================================
     public void ProcessPendingResponses(Player player) {
+        memorialTextCounter = 0;
+        memorialTextDrawn   = false;
         if (player.StateMachine.State == Player.StDummy ||
                 player.StateMachine.State == Player.StIntroWalk ||
                 player.StateMachine.State == Player.StIntroJump ||

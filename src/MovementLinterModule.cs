@@ -5,6 +5,7 @@ using Celeste.Mod.SpeedrunTool.SaveLoad;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using YamlDotNet.Serialization;
 
 namespace Celeste.Mod.MovementLinter;
 
@@ -22,6 +23,19 @@ public class MovementLinterModule : EverestModule {
     public override void CreateModMenuSection(TextMenu menu, bool inGame, FMOD.Studio.EventInstance pauseSnapshot) {
         CreateModMenuSectionHeader(menu, inGame, pauseSnapshot);
         Settings.CreateMenu(menu, inGame);
+    }
+
+    public override void SaveSettings() {
+        // The YamlDotNet API made me quit modding a while back. Still makes me retch.
+        ISerializer restoreSerializer = YamlHelper.Serializer;
+        if (!Settings.MemorialTextEnabled) {
+            YamlHelper.Serializer = new SerializerBuilder().WithAttributeOverride<MovementLinterModuleSettings>(
+                (MovementLinterModuleSettings settings) => settings.MemorialTextEnabled,
+                new YamlIgnoreAttribute()
+            ).Build();
+        }
+        base.SaveSettings();
+        YamlHelper.Serializer = restoreSerializer;
     }
 
     // =================================================================================================================
