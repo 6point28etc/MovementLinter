@@ -84,6 +84,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         Always,
     }
     public const int MaxShortDurationFrames  = 99;
+    public const int MaxFastBubbleFrames     = 16;
     public const int MaxShortWallboostFrames = 11;
     public const int MemorialTextThreshold   = 3;
 
@@ -544,6 +545,32 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     public DashAfterUpEntrySettings DashAfterUpEntry { get; set; } = new();
 
     // =================================================================================================================
+    public class FastBubbleSettings : LintRuleSettings<bool> {
+        public int Frames { get; set; } = 5;
+
+        public FastBubbleSettings() : base(true, DialogIds.FastBubble, DialogIds.FastBubbleHint) {}
+
+        public override bool IsEnabled() => Mode;
+
+        protected override BetterWidthOption<bool> MakeModeMenuItem() {
+            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
+        }
+
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new BetterWidthSlider(
+                    label  : Dialog.Clean(DialogIds.FastBubbleFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxFastBubbleFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
+    }
+    public FastBubbleSettings FastBubble { get; set; } = new();
+
+    // =================================================================================================================
     public class ReleaseWBeforeDashSettings : LintRuleSettings<bool>{
         public int Frames { get; set; } = 4;
 
@@ -689,6 +716,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                    .AddItem(MoveAfterLand.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
                    .AddItem(MoveAfterGainControl.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
                    .AddItem(DashAfterUpEntry.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
+                   .AddItem(FastBubble.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
                    .AddItem(ReleaseWBeforeDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
                    .AddItem(FastfallGlitchBeforeDash.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))
                    .AddItem(TurnBeforeWallkick.MakeSubMenu(inGame, menu, mainEnable.RightWidth(), MemorialTextEnabled))

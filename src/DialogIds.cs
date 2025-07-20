@@ -118,11 +118,17 @@ public static class DialogIds {
     public const string MoveAfterGainControlWarnSingular = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_SINGULAR";
     public const string MoveAfterGainControlWarnPlural   = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_PLURAL";
 
-    public const string DashAfterUpEntry         = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY";
-    public const string DashAfterUpEntryHint     = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_HINT";
-    public const string DashAfterUpEntryFrames   = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_FRAMES";
-    public const string DashAfterUpEntrySingular = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_WARN_SINGULAR";
-    public const string DashAfterUpEntryPlural   = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_WARN_PLURAL";
+    public const string DashAfterUpEntry             = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY";
+    public const string DashAfterUpEntryHint         = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_HINT";
+    public const string DashAfterUpEntryFrames       = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_FRAMES";
+    public const string DashAfterUpEntryWarnSingular = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_WARN_SINGULAR";
+    public const string DashAfterUpEntryWarnPlural   = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_WARN_PLURAL";
+
+    public const string FastBubble             = "MOVEMENT_LINTER_FAST_BUBBLE";
+    public const string FastBubbleHint         = "MOVEMENT_LINTER_FAST_BUBBLE_HINT";
+    public const string FastBubbleFrames       = "MOVEMENT_LINTER_FAST_BUBBLE_FRAMES";
+    public const string FastBubbleWarnSingular = "MOVEMENT_LINTER_FAST_BUBBLE_WARN_SINGULAR";
+    public const string FastBubbleWarnPlural   = "MOVEMENT_LINTER_FAST_BUBBLE_WARN_PLURAL";
 
     public const string ReleaseWBeforeDash             = "MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH";
     public const string ReleaseWBeforeDashHint         = "MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_HINT";
@@ -143,8 +149,8 @@ public static class DialogIds {
     public const string TurnBeforeWallkickWarnPlural   = "MOVEMENT_LINTER_TURN_BEFORE_WALLKICK_WARN_PLURAL";
 
     public const string ShortWallboost             = "MOVEMENT_LINTER_SHORT_WALLBOOST";
-    public const string ShortWallboostFrames       = "MOVEMENT_LINTER_SHORT_WALLBOOST_FRAMES";
     public const string ShortWallboostHint         = "MOVEMENT_LINTER_SHORT_WALLBOOST_HINT";
+    public const string ShortWallboostFrames       = "MOVEMENT_LINTER_SHORT_WALLBOOST_FRAMES";
     public const string ShortWallboostWarnSingular = "MOVEMENT_LINTER_SHORT_WALLBOOST_WARN_SINGULAR";
     public const string ShortWallboostWarnPlural   = "MOVEMENT_LINTER_SHORT_WALLBOOST_WARN_PLURAL";
 

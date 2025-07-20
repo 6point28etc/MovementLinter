@@ -151,6 +151,15 @@ MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_FRAMES= Frames Late
 MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_WARN_SINGULAR= Detected dash 1 frame late after up transition
 MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_WARN_PLURAL=   Detected dash {0} frames late after up transition
 
+MOVEMENT_LINTER_FAST_BUBBLE=               Unbuffered Fastbubble
+MOVEMENT_LINTER_FAST_BUBBLE_HINT=          Detects late fastbubbles.
+                                           Only applies if Madeline could not dash immediately before entering the bubble.
+                                           The Frames Late settings controls the maximum length of waiting
+                                           before fastbubbling to be considered accidental.
+MOVEMENT_LINTER_FAST_BUBBLE_FRAMES=        Frames Late
+MOVEMENT_LINTER_FAST_BUBBLE_WARN_SINGULAR= Detected 1-frame-late fastbubble
+MOVEMENT_LINTER_FAST_BUBBLE_WARN_PLURAL=   Detected {0}-frames-late fastbubble
+
 MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH=               Release Forward Before Dash
 MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_HINT=          Detects a change in the moveX input before dashing that results in not
                                                      holding forward for a few frames. The Release / Turn Frames setting controls

@@ -70,6 +70,10 @@ public class MovementLinterModule : EverestModule {
         // Dash after up transition
         public int FramesSinceUpTransition = BeyondShortDurationFrames;
 
+        // Fastbubbles
+        public bool CouldDashBeforeBubble = true;
+        public int FramesBeforeFastBubble = 0;
+
         // moveX checks
         public Vector2 FrameStartPlayerSpeed = Vector2.Zero;
         public bool ForceMoveXActive         = false;
@@ -114,6 +118,9 @@ public class MovementLinterModule : EverestModule {
         On.Celeste.Player.Jump        += OnPlayerJump;
         On.Celeste.Player.WallJump    += OnPlayerWallJump;
         On.Celeste.Player.StartDash   += OnPlayerStartDash;
+        On.Celeste.Player.Boost       += OnPlayerBoost;
+        On.Celeste.Player.RedBoost    += OnPlayerRedBoost;
+        On.Celeste.Player.BoostUpdate += OnPlayerBoostUpdate;
         IL.Celeste.Player.OnCollideV  += PatchPlayerOnCollideV;
         On.Celeste.Level.TransitionTo += OnLevelTransitionTo;
 
@@ -145,6 +152,9 @@ public class MovementLinterModule : EverestModule {
         On.Celeste.Player.Jump        -= OnPlayerJump;
         On.Celeste.Player.WallJump    -= OnPlayerWallJump;
         On.Celeste.Player.StartDash   -= OnPlayerStartDash;
+        On.Celeste.Player.Boost       -= OnPlayerBoost;
+        On.Celeste.Player.RedBoost    -= OnPlayerRedBoost;
+        On.Celeste.Player.BoostUpdate -= OnPlayerBoostUpdate;
         IL.Celeste.Player.OnCollideV  -= PatchPlayerOnCollideV;
         On.Celeste.Level.TransitionTo -= OnLevelTransitionTo;
 
@@ -463,9 +473,53 @@ public class MovementLinterModule : EverestModule {
         int dashLateFramesAfterUpEntry = det.FramesSinceUpTransition - UpEntryDashLockoutFrames;
         if (dashLateFramesAfterUpEntry > 0 &&
                 dashLateFramesAfterUpEntry <= Settings.DashAfterUpEntry.Frames) {
-            res.DoLintResponses(Settings.DashAfterUpEntry, DialogIds.DashAfterUpEntrySingular,
-                                DialogIds.DashAfterUpEntryPlural, dashLateFramesAfterUpEntry);
+            res.DoLintResponses(Settings.DashAfterUpEntry, DialogIds.DashAfterUpEntryWarnSingular,
+                                DialogIds.DashAfterUpEntryWarnPlural, dashLateFramesAfterUpEntry);
         }
+        return orig(player);
+    }
+
+    // =================================================================================================================
+    // Bubble-related hooks
+    private static void OnPlayerBoost(On.Celeste.Player.orig_Boost orig, Player player, Booster booster) {
+        OnEnterBubble(player);
+        orig(player, booster);
+    }
+
+    private static void OnPlayerRedBoost(On.Celeste.Player.orig_RedBoost orig, Player player, Booster booster) {
+        OnEnterBubble(player);
+        orig(player, booster);
+    }
+
+    private static void OnEnterBubble(Player player) {
+        det.CouldDashBeforeBubble  = CanDashIfDashPressed(player);
+        det.FramesBeforeFastBubble = 0;
+    }
+
+    private static bool CanDashIfDashPressed(Player player) {
+        // This is just player.CanDash with the input check removed
+        if (player.dashCooldownTimer <= 0f &&
+                player.Dashes > 0 &&
+                (TalkComponent.PlayerOver == null || !Input.Talk.Pressed)) {
+            if (player.LastBooster != null && player.LastBooster.Ch9HubTransition) {
+                return !player.LastBooster.BoostingPlayer;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private static int OnPlayerBoostUpdate(On.Celeste.Player.orig_BoostUpdate orig, Player player) {
+        if ((Input.DashPressed || Input.CrouchDashPressed) &&
+                !det.CouldDashBeforeBubble &&
+                det.FramesBeforeFastBubble > 0 &&
+                det.FramesBeforeFastBubble <= Settings.FastBubble.Frames) {
+            res.DoLintResponses(Settings.FastBubble, DialogIds.FastBubbleWarnSingular, DialogIds.FastBubbleWarnPlural,
+                                det.FramesBeforeFastBubble);
+        }
+        ++det.FramesBeforeFastBubble;
         return orig(player);
     }
 
