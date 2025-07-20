@@ -201,8 +201,8 @@ public class MovementLinterModule : EverestModule {
                 det.JumpReleaseFrames > 0 &&
                 det.JumpReleaseFrames <= Settings.JumpReleaseJump.Frames &&
                 det.JumpReleaseMatters) {
-            res.DoLintResponse(Settings.JumpReleaseJump, DialogIds.JumpReleaseJumpWarnSingular,
-                               DialogIds.JumpReleaseJumpWarnPlural, det.JumpReleaseFrames);
+            res.DoLintResponses(Settings.JumpReleaseJump, DialogIds.JumpReleaseJumpWarnSingular,
+                                DialogIds.JumpReleaseJumpWarnPlural, det.JumpReleaseFrames);
         }
         if (Input.Jump.Check) {
             det.JumpReleaseFrames  = 0;
@@ -276,8 +276,8 @@ public class MovementLinterModule : EverestModule {
         // I'm not going to explain all of them, just trust me, this is the right number to use.
         int wallBoostFrames = (int) Math.Round((Player.ClimbJumpBoostTime - player.wallBoostTimer) * 60f) - 1;
         if (wallBoostFrames <= Settings.ShortWallboost.Frames) {
-            res.DoLintResponse(Settings.ShortWallboost, DialogIds.ShortWallboostWarnSingular,
-                               DialogIds.ShortWallboostWarnPlural, wallBoostFrames);
+            res.DoLintResponses(Settings.ShortWallboost, DialogIds.ShortWallboostWarnSingular,
+                                DialogIds.ShortWallboostWarnPlural, wallBoostFrames);
         }
     }
 
@@ -351,7 +351,7 @@ public class MovementLinterModule : EverestModule {
         if (!player.wasOnGround &&
                 ((player.DashDir.X != 0f && player.DashDir.Y > 0f && player.Speed.Y > 0f) ||
                  (Settings.BufferedUltra.Mode == MovementLinterModuleSettings.BufferedUltraMode.Always && det.UltradLastFrame))) {
-            res.DoLintResponse(Settings.BufferedUltra, DialogIds.BufferedUltraWarn, DialogIds.BufferedUltraWarn, 0);
+            res.DoLintResponses(Settings.BufferedUltra, DialogIds.BufferedUltraWarn, DialogIds.BufferedUltraWarn, 0);
         }
     }
 
@@ -379,8 +379,8 @@ public class MovementLinterModule : EverestModule {
             if (det.InControlFrames > 0 &&
                     det.InControlFrames <= Settings.MoveAfterGainControl.Frames &&
                     button.bufferCounter == button.BufferTime) {
-                res.DoLintResponse(Settings.MoveAfterGainControl, DialogIds.MoveAfterGainControlWarnSingular,
-                                   DialogIds.MoveAfterGainControlWarnPlural, det.InControlFrames);
+                res.DoLintResponses(Settings.MoveAfterGainControl, DialogIds.MoveAfterGainControlWarnSingular,
+                                    DialogIds.MoveAfterGainControlWarnPlural, det.InControlFrames);
             }
             det.InControlFrames = BeyondShortDurationFrames;
         }
@@ -395,8 +395,8 @@ public class MovementLinterModule : EverestModule {
                 det.FramesAfterLand > 0 &&
                 det.FramesAfterLand <= Settings.MoveAfterLand.Frames &&
                 !(Settings.MoveAfterLand.IgnoreUltras && det.UltradSinceLanding)) {
-            res.DoLintResponse(Settings.MoveAfterLand, DialogIds.MoveAfterLandWarnSingular,
-                               DialogIds.MoveAfterLandWarnPlural, det.FramesAfterLand);
+            res.DoLintResponses(Settings.MoveAfterLand, DialogIds.MoveAfterLandWarnSingular,
+                                DialogIds.MoveAfterLandWarnPlural, det.FramesAfterLand);
         }
     }
 
@@ -410,8 +410,8 @@ public class MovementLinterModule : EverestModule {
                 Math.Sign(det.FrameStartPlayerSpeed.X) != dir &&
                 !det.LastMoveXWasForward &&
                 det.MoveXFrames <= Settings.TurnBeforeWallkick.Frames) {
-            res.DoLintResponse(Settings.TurnBeforeWallkick, DialogIds.TurnBeforeWallkickWarnSingular,
-                               DialogIds.TurnBeforeWallkickWarnPlural, det.MoveXFrames);
+            res.DoLintResponses(Settings.TurnBeforeWallkick, DialogIds.TurnBeforeWallkickWarnSingular,
+                                DialogIds.TurnBeforeWallkickWarnPlural, det.MoveXFrames);
         }
         orig(player, dir);
     }
@@ -423,34 +423,34 @@ public class MovementLinterModule : EverestModule {
                 det.JumpReleaseFrames > 0 &&
                 det.JumpReleaseFrames <= Settings.JumpReleaseDash.Frames &&
                 det.JumpReleaseMatters) {
-            res.DoLintResponse(Settings.JumpReleaseDash, DialogIds.JumpReleaseDashWarnSingular,
-                               DialogIds.JumpReleaseDashWarnPlural, det.JumpReleaseFrames);
+            res.DoLintResponses(Settings.JumpReleaseDash, DialogIds.JumpReleaseDashWarnSingular,
+                                DialogIds.JumpReleaseDashWarnPlural, det.JumpReleaseFrames);
         }
         if (det.LastFinishedUpdateState == Player.StNormal &&
                 !det.ForceMoveXActive &&
                 !det.LastMoveXWasForward &&
                 det.MoveXFrames <= Settings.ReleaseWBeforeDash.Frames) {
-            res.DoLintResponse(Settings.ReleaseWBeforeDash, DialogIds.ReleaseWBeforeDashWarnSingular,
-                               DialogIds.ReleaseWBeforeDashWarnPlural, det.MoveXFrames);
+            res.DoLintResponses(Settings.ReleaseWBeforeDash, DialogIds.ReleaseWBeforeDashWarnSingular,
+                                DialogIds.ReleaseWBeforeDashWarnPlural, det.MoveXFrames);
         }
         if (det.FastfallCheckedLastFrame &&
                 !det.FirstFastfallInput &&
                 det.FastfallMoveYFrames <= Settings.FastfallGlitchBeforeDash.Frames) {
-            res.DoLintResponse(Settings.FastfallGlitchBeforeDash, DialogIds.FastfallGlitchBeforeDashWarnSingular,
-                               DialogIds.FastfallGlitchBeforeDashWarnPlural, det.FastfallMoveYFrames);
+            res.DoLintResponses(Settings.FastfallGlitchBeforeDash, DialogIds.FastfallGlitchBeforeDashWarnSingular,
+                                DialogIds.FastfallGlitchBeforeDashWarnPlural, det.FastfallMoveYFrames);
         }
         if (((Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.DashOnly) ||
              (Settings.MoveAfterLand.Mode == MovementLinterModuleSettings.MoveAfterLandMode.DashOrJump)) &&
                 det.FramesAfterLand > 0 &&
                 det.FramesAfterLand <= Settings.MoveAfterLand.Frames) {
-            res.DoLintResponse(Settings.MoveAfterLand, DialogIds.MoveAfterLandWarnSingular,
-                               DialogIds.MoveAfterLandWarnPlural, det.FramesAfterLand);
+            res.DoLintResponses(Settings.MoveAfterLand, DialogIds.MoveAfterLandWarnSingular,
+                                DialogIds.MoveAfterLandWarnPlural, det.FramesAfterLand);
         }
         int dashLateFramesAfterUpEntry = det.FramesSinceUpTransition - UpEntryDashLockoutFrames;
         if (dashLateFramesAfterUpEntry > 0 &&
                 dashLateFramesAfterUpEntry <= Settings.DashAfterUpEntry.Frames) {
-            res.DoLintResponse(Settings.DashAfterUpEntry, DialogIds.DashAfterUpEntrySingular,
-                               DialogIds.DashAfterUpEntryPlural, dashLateFramesAfterUpEntry);
+            res.DoLintResponses(Settings.DashAfterUpEntry, DialogIds.DashAfterUpEntrySingular,
+                                DialogIds.DashAfterUpEntryPlural, dashLateFramesAfterUpEntry);
         }
         return orig(player);
     }
@@ -482,8 +482,8 @@ public class MovementLinterModule : EverestModule {
                 det.JumpReleaseFrames <= Settings.JumpReleaseExit.Frames &&
                 det.JumpReleaseMatters &&
                 det.FrameStartPlayerState == Player.StNormal) {
-            res.DoLintResponse(Settings.JumpReleaseExit, DialogIds.JumpReleaseExitWarnSingular,
-                               DialogIds.JumpReleaseExitWarnPlural, det.JumpReleaseFrames);
+            res.DoLintResponses(Settings.JumpReleaseExit, DialogIds.JumpReleaseExitWarnSingular,
+                                DialogIds.JumpReleaseExitWarnPlural, det.JumpReleaseFrames);
         }
         det.JumpReleaseFrames  = BeyondShortDurationFrames;
         det.JumpReleaseMatters = false;

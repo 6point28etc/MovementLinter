@@ -36,21 +36,25 @@ public class LintResponder {
     private Random random = new();
 
     // =================================================================================================================
-    public void DoLintResponse<ModeT>(MovementLinterModuleSettings.LintRuleSettings<ModeT> lintRuleSettings,
-                                      string singularWarnId, string pluralWarnId, int warnParam) {
+    public void DoLintResponses<ModeT>(MovementLinterModuleSettings.LintRuleSettings<ModeT> lintRuleSettings,
+                                       string singularWarnId, string pluralWarnId, int warnParam) {
         if (!MovementLinterModule.Settings.Enabled || !lintRuleSettings.IsEnabled()) {
             return;
         }
-
         string warning = (warnParam == 1) ? Dialog.Clean(singularWarnId)
                                           : string.Format(Dialog.Get(pluralWarnId), warnParam);
+        foreach (MovementLinterModuleSettings.LintResponse response in lintRuleSettings.Responses) {
+            DoLintResponse(response, warning);
+        }
+    }
 
-        switch (lintRuleSettings.Response) {
-        case MovementLinterModuleSettings.LintResponse.Tooltip:
+    private void DoLintResponse(MovementLinterModuleSettings.LintResponse response, string warning) {
+        switch (response.Option) {
+        case MovementLinterModuleSettings.LintResponseOption.Tooltip:
             pendingTooltips.Enqueue(warning);
             break;
-        case MovementLinterModuleSettings.LintResponse.Dialog:
-            string portrait = lintRuleSettings.DialogCharacter switch {
+        case MovementLinterModuleSettings.LintResponseOption.Dialog:
+            string portrait = response.DialogCharacter switch {
                 MovementLinterModuleSettings.CharacterOption.Madeline => DialogIds.MadelinePortrait,
                 MovementLinterModuleSettings.CharacterOption.Badeline => DialogIds.BadelinePortrait,
                 MovementLinterModuleSettings.CharacterOption.Granny   => DialogIds.GrannyPortrait,
@@ -60,14 +64,14 @@ public class LintResponder {
             };
             pendingDialog.Enqueue(portrait + warning);
             break;
-        case MovementLinterModuleSettings.LintResponse.Kill:
+        case MovementLinterModuleSettings.LintResponseOption.Kill:
             // We could be getting called from anywhere, maybe this is a bad time to kill the player
             // (if the player even exists right now), so just set this flag and we'll handle it in player update.
             pendingKill = true;
             break;
 
-        case MovementLinterModuleSettings.LintResponse.SFX:
-            switch (lintRuleSettings.SFX) {
+        case MovementLinterModuleSettings.LintResponseOption.SFX:
+            switch (response.SFX) {
             case MovementLinterModuleSettings.SFXOption.Caw:
                 Audio.Play(SFX.game_gen_bird_squawk);
                 break;
@@ -156,28 +160,37 @@ public class LintResponder {
             }
             break;
 
-        case MovementLinterModuleSettings.LintResponse.SpriteColor:
-            pendingSpriteColors.Enqueue(ColorOptionToColor(lintRuleSettings.SpriteColor,
-                                                           lintRuleSettings.CustomSpriteColor));
+        case MovementLinterModuleSettings.LintResponseOption.SpriteColor:
+            pendingSpriteColors.Enqueue(ColorOptionToColor(response.SpriteColor,
+                                                           response.CustomSpriteColor));
             break;
         
-        case MovementLinterModuleSettings.LintResponse.HairColor:
-            pendingHairColors.Enqueue(ColorOptionToColor(lintRuleSettings.HairColor,
-                                                         lintRuleSettings.CustomHairColor));
+        case MovementLinterModuleSettings.LintResponseOption.HairColor:
+            pendingHairColors.Enqueue(ColorOptionToColor(response.HairColor,
+                                                         response.CustomHairColor));
             break;
 
-        case MovementLinterModuleSettings.LintResponse.Hiccup:
+        case MovementLinterModuleSettings.LintResponseOption.Hiccup:
             pendingHiccup = true;
             break;
 
-        case MovementLinterModuleSettings.LintResponse.Hazard:
-            pendingHazards.Enqueue(lintRuleSettings.Hazard);
+        case MovementLinterModuleSettings.LintResponseOption.Hazard:
+            pendingHazards.Enqueue(response.Hazard);
             break;
         }
     }
 
     // =================================================================================================================
     public void ProcessPendingResponses(Player player) {
+        if (player.StateMachine.State == Player.StDummy ||
+                player.StateMachine.State == Player.StIntroWalk ||
+                player.StateMachine.State == Player.StIntroJump ||
+                player.StateMachine.State == Player.StIntroRespawn ||
+                player.StateMachine.State == Player.StIntroWakeUp) {
+            // Keep pending until we have a more "real" state
+            return;
+        }
+
         // If we're killing Madeline, wait to do any other responses until we get polled again after she respawns
         if (pendingKill) {
             player.Die(Vector2.Zero, true);

@@ -7,7 +7,7 @@ namespace Celeste.Mod.MovementLinter;
 [SettingName(DialogIds.MovementLinter)]
 public class MovementLinterModuleSettings : EverestModuleSettings {
     // =================================================================================================================
-    public enum LintResponse {
+    public enum LintResponseOption {
         Tooltip,
         Dialog,
         Kill,
@@ -89,19 +89,8 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     public bool Enabled { get; set; } = true;
 
     // =================================================================================================================
-    /// <summary>
-    ///     Base class for all the settings associated with a single heuristic rule / check
-    /// </summary>
-    /// <typeparam name="ModeT">
-    ///     Type of the "mode" setting for this rule
-    ///     (bool for a simple on/off toggle, or some enum for a richer set of mode options)
-    /// </typeparam>
-    public abstract class LintRuleSettings<ModeT> {
-        private readonly string titleId;
-        private readonly string hintId;
-
-        public ModeT Mode { get; set; }
-        public LintResponse Response { get; set; }           = LintResponse.Tooltip;
+    public class LintResponse {
+        public LintResponseOption Option { get; set; }       = LintResponseOption.Tooltip;
         public CharacterOption DialogCharacter { get; set; } = CharacterOption.Madeline;
         public SFXOption SFX { get; set; }                   = SFXOption.Caw;
         public ColorOption SpriteColor { get; set; }         = ColorOption.Red;
@@ -110,26 +99,11 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         public string CustomHairColor { get; set; }          = "6487ed";
         public HazardOption Hazard { get; set; }             = HazardOption.BadelineChaser;
 
-        public LintRuleSettings(ModeT defaultMode, string titleId, string hintId) {
-            this.Mode    = defaultMode;
-            this.titleId = titleId;
-            this.hintId  = hintId;
-        }
-
-        /// <summary>
-        ///     Return a submenu to control the settings for this lint rule
-        /// </summary>
-        /// <param name="inGame"> Whether the menu was opened in-game vs from the main menu</param>
-        /// <param name="topMenu">The top-level TextMenu containing this submenu</param>
-        /// <param name="compactRightWidth">The right-width to use in compact mode</param>
-        public RecursiveSubMenu MakeSubMenu(bool inGame, TextMenu topMenu, float compactRightWidth) {
-            BetterWidthOption<ModeT> modeItem = MakeModeMenuItem();
-            modeItem.Change((ModeT val) => Mode = val);
-            OptionPreview<ModeT> preview = new(modeItem);
-
-            // Set up the response submenu first since some items need access to it
+        // -------------------------------------------------------------------------------------------------------------
+        public RecursiveOptionSubMenu MakeSubMenu(bool inGame, TextMenu topMenu, float compactRightWidth) {
+            // Make the response menu first since some items need access to it
             RecursiveOptionSubMenu responseMenu = new(label: Dialog.Clean(DialogIds.LintResponse),
-                                                      initialMenuSelection: (int) Response,
+                                                      initialMenuSelection: (int) Option,
                                                       compactRightWidth: compactRightWidth);
 
             // Dialog
@@ -236,25 +210,135 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                         .Add(Dialog.Clean(DialogIds.Seeker),         HazardOption.Seeker,         Hazard == HazardOption.Seeker)
                         .Change((HazardOption val) => Hazard = val);
 
-            // Add all responses to the response menu, then make the submenu for the whole lint rule
-            List<TextMenu.Item> items = [
+            // Add all options to the response menu
+            responseMenu.AddMenu(Dialog.Clean(DialogIds.LintResponseTooltip), [])
+                        .AddMenu(Dialog.Clean(DialogIds.LintResponseDialog), [characterSlider])
+                        .AddMenu(Dialog.Clean(DialogIds.LintResponseKill), [])
+                        .AddMenu(Dialog.Clean(DialogIds.LintResponseSFX), [sfxSlider])
+                        .AddMenu(Dialog.Clean(DialogIds.LintResponseSpriteColor), [spriteColorSlider,
+                                                                                   customSpriteColorHint])
+                        .AddMenu(Dialog.Clean(DialogIds.LintResponseHairColor), [hairColorSlider,
+                                                                                 customHairColorHint])
+                        .AddMenu(Dialog.Clean(DialogIds.LintResponseHiccup), [])
+                        .AddMenu(Dialog.Clean(DialogIds.LintResponseHazard), [hazardSlider])
+                        .Change((int val) => Option = (LintResponseOption) val);
+            return responseMenu;
+        }
+    }
+
+    // =================================================================================================================
+    /// <summary>
+    ///     Base class for all the settings associated with a single heuristic rule / check
+    /// </summary>
+    /// <typeparam name="ModeT">
+    ///     Type of the "mode" setting for this rule
+    ///     (bool for a simple on/off toggle, or some enum for a richer set of mode options)
+    /// </typeparam>
+    public abstract class LintRuleSettings<ModeT> {
+        private const int maxResponses = 3;
+
+        private readonly string titleId;
+        private readonly string hintId;
+
+        public ModeT Mode { get; set; }
+        public List<LintResponse> Responses { get; set; } = [new()];
+
+        public LintRuleSettings(ModeT defaultMode, string titleId, string hintId) {
+            this.Mode    = defaultMode;
+            this.titleId = titleId;
+            this.hintId  = hintId;
+        }
+
+        /// <summary>
+        ///     Return a submenu to control the settings for this lint rule
+        /// </summary>
+        /// <param name="inGame"> Whether the menu was opened in-game vs from the main menu</param>
+        /// <param name="topMenu">The top-level TextMenu containing this submenu</param>
+        /// <param name="compactRightWidth">The right-width to use in compact mode</param>
+        public RecursiveSubMenu MakeSubMenu(bool inGame, TextMenu topMenu, float compactRightWidth) {
+            // Mode and preview thereof
+            BetterWidthOption<ModeT> modeItem = MakeModeMenuItem();
+            modeItem.Change((ModeT val) => Mode = val);
+            OptionPreview<ModeT> modePreview = new(modeItem);
+            List<TextMenu.Item> menuItems    = [
                 modeItem,
-                responseMenu.AddMenu(Dialog.Clean(DialogIds.LintResponseTooltip), [])
-                            .AddMenu(Dialog.Clean(DialogIds.LintResponseDialog), [characterSlider])
-                            .AddMenu(Dialog.Clean(DialogIds.LintResponseKill), [])
-                            .AddMenu(Dialog.Clean(DialogIds.LintResponseSFX), [sfxSlider])
-                            .AddMenu(Dialog.Clean(DialogIds.LintResponseSpriteColor), [spriteColorSlider,
-                                                                                       customSpriteColorHint])
-                            .AddMenu(Dialog.Clean(DialogIds.LintResponseHairColor), [hairColorSlider,
-                                                                                     customHairColorHint])
-                            .AddMenu(Dialog.Clean(DialogIds.LintResponseHiccup), [])
-                            .AddMenu(Dialog.Clean(DialogIds.LintResponseHazard), [hazardSlider])
-                            .Change((int val) => Response = (LintResponse) val)
             ];
-            items.AddRange(MakeUniqueMenuItems(inGame));
-            items.Add(new TextMenuExt.EaseInSubHeaderExt(Dialog.Clean(hintId), true, topMenu){ HeightExtra = 0f });
-            return new RecursiveSubMenu(label: Dialog.Clean(titleId), compactRightWidth: compactRightWidth,
-                                        items: items, preview: preview);
+            
+            // Make the submenu now since we need to manipulate it from the response items
+            RecursiveSubMenu ruleMenu = new(label: Dialog.Clean(titleId), compactRightWidth: compactRightWidth,
+                                            preview: modePreview);
+
+            // Make add response button and the hint that goes with it, don't add them yet
+            TextMenu.Button addResponseButton = new(Dialog.Clean(DialogIds.AddResponse)){
+                Disabled = (Responses.Count >= maxResponses)
+            };
+            ParentAwareEaseInSubHeader removeResponseHint = new(Dialog.Clean(DialogIds.RemoveResponseHint),
+                                                                addResponseButton.Disabled,
+                                                                topMenu, ruleMenu){ HeightExtra = 0f };
+            addResponseButton.Enter(delegate { removeResponseHint.FadeVisible = true; })
+                             .Leave(delegate { removeResponseHint.FadeVisible = addResponseButton.Disabled; });
+
+            // Make and add response menus for the existing responses from the existing settings
+            foreach (LintResponse response in Responses) {
+                RecursiveOptionSubMenu responseMenu = response.MakeSubMenu(inGame, topMenu, compactRightWidth);
+                SetDeleteResponseBind(response, responseMenu, ruleMenu, addResponseButton, removeResponseHint);
+                menuItems.Add(responseMenu);
+            };
+
+            // Callback to add a response and its menu
+            addResponseButton.Pressed(delegate {
+                if (Responses.Count >= maxResponses) {
+                    // Prevent violating the max responses during the response add animation
+                    // before we've moved ourselves off the button
+                    return;
+                }
+                LintResponse newResponse = new();
+                Responses.Add(newResponse);
+                RecursiveOptionSubMenu newResponseMenu = newResponse.MakeSubMenu(inGame, topMenu, compactRightWidth);
+                SetDeleteResponseBind(newResponse, newResponseMenu, ruleMenu, addResponseButton, removeResponseHint);
+                ruleMenu.InsertItem(ruleMenu.CurrentMenu.IndexOf(addResponseButton), newResponseMenu, true,
+                                    (TextMenu.Item item) => {
+                                        // Force the selection off the button after the new response finishes adding
+                                        if (addResponseButton.Disabled && ruleMenu.Current == addResponseButton) {
+                                            ruleMenu.MoveSelection(-1, false, true);
+                                        }
+                                    });
+                if (Responses.Count >= maxResponses) {
+                    addResponseButton.Disabled = true;
+                }
+            });
+
+            // Add the add response button and its hint after all the responses
+            menuItems.Add(addResponseButton);
+            menuItems.Add(removeResponseHint);
+
+            // Per-rule items, hint
+            menuItems.AddRange(MakeUniqueMenuItems(inGame));
+            menuItems.Add(new TextMenuExt.EaseInSubHeaderExt(Dialog.Clean(hintId), true, topMenu){ HeightExtra = 0f });
+
+            // Add all items to the menu
+            foreach (TextMenu.Item item in menuItems) {
+                ruleMenu.AddItem(item);
+            }
+            return ruleMenu;
+        }
+
+        private void SetDeleteResponseBind(LintResponse response, RecursiveOptionSubMenu responseMenu,
+                                           RecursiveSubMenu ruleMenu, TextMenu.Button addResponseButton,
+                                           ParentAwareEaseInSubHeader removeResponseHint) {
+            responseMenu.AltPressed(delegate {
+                if (Responses.Count > 1) {
+                    Responses.Remove(response);
+                    ruleMenu.RemoveItem(responseMenu, true);
+                    Audio.Play(SFX.ui_main_button_back);
+                    if (Responses.Count < maxResponses) {
+                        addResponseButton.Disabled     = false;
+                        removeResponseHint.FadeVisible = false;
+                    }
+                } else {
+                    Audio.Play(SFX.ui_main_button_invalid);
+                }
+            });
         }
 
         /// <summary>

@@ -85,6 +85,9 @@ MOVEMENT_LINTER_HAZARD_ANGRY_OSHIRO=    Oshiro
 MOVEMENT_LINTER_HAZARD_SNOWBALL=        Snowball
 MOVEMENT_LINTER_HAZARD_SEEKER=          Seeker
 
+MOVEMENT_LINTER_ADD_RESPONSE=         Add Response
+MOVEMENT_LINTER_REMOVE_RESPONSE_HINT= Press Journal on a response to remove it
+
 MOVEMENT_LINTER_JUMP_RELEASE_JUMP=               Jump Release Between Jumps
 MOVEMENT_LINTER_JUMP_RELEASE_JUMP_HINT=          Detects unintended jump releases during consecutive jumps.
                                                  Looks for two jump inputs separated by a short release.

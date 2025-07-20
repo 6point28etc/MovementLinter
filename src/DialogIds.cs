@@ -75,6 +75,9 @@ public static class DialogIds {
     public const string Snowball       = "MOVEMENT_LINTER_HAZARD_SNOWBALL";
     public const string Seeker         = "MOVEMENT_LINTER_HAZARD_SEEKER";
 
+    public const string AddResponse        = "MOVEMENT_LINTER_ADD_RESPONSE";
+    public const string RemoveResponseHint = "MOVEMENT_LINTER_REMOVE_RESPONSE_HINT";
+
     public const string JumpReleaseJump             = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP";
     public const string JumpReleaseJumpHint         = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_HINT";
     public const string JumpReleaseJumpFrames       = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_FRAMES";
