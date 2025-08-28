@@ -4,6 +4,8 @@ public static class DialogIds {
     public const string MovementLinter = "MOVEMENT_LINTER";
     public const string Enabled        = "MOVEMENT_LINTER_ENABLED";
     public const string Off            = "MOVEMENT_LINTER_OFF";
+    public const string Confirm        = "MOVEMENT_LINTER_CONFIRM";
+    public const string Cancel         = "MOVEMENT_LINTER_CANCEL";
     public const string Mode           = "MOVEMENT_LINTER_MODE";
     public const string None           = "MOVEMENT_LINTER_NONE";
 
@@ -159,4 +161,54 @@ public static class DialogIds {
     public const string BufferedUltraOnlyWhenMattered = "MOVEMENT_LINTER_BUFFERED_ULTRA_ONLY_WHEN_MATTERED";
     public const string BufferedUltraAlways           = "MOVEMENT_LINTER_BUFFERED_ULTRA_ALWAYS";
     public const string BufferedUltraWarn             = "MOVEMENT_LINTER_BUFFERED_ULTRA_WARN_SINGULAR";
+
+    public const string LevelSet              = "MOVEMENT_LINTER_LEVEL_SET";
+    public const string Chapter               = "MOVEMENT_LINTER_CHAPTER";
+    public const string Side                  = "MOVEMENT_LINTER_SIDE";
+    public const string SideAShort            = "MOVEMENT_LINTER_SIDE_A_SHORT";
+    public const string SideBShort            = "MOVEMENT_LINTER_SIDE_B_SHORT";
+    public const string SideCShort            = "MOVEMENT_LINTER_SIDE_C_SHORT";
+    public const string ASideFull             = "MOVEMENT_LINTER_A_SIDE_FULL";
+    public const string BSideFull             = "MOVEMENT_LINTER_B_SIDE_FULL";
+    public const string CSideFull             = "MOVEMENT_LINTER_C_SIDE_FULL";
+    public const string ChapterWithSideFormat = "MOVEMENT_LINTER_CHAPTER_WITH_SIDE_FORMAT";
+    public static string ShortIdForSide(AreaMode side) {
+        return side switch {
+            AreaMode.Normal => SideAShort,
+            AreaMode.BSide  => SideBShort,
+            AreaMode.CSide  => SideCShort,
+            _ => ""
+        };
+    }
+    public static string FullIdForSide(AreaMode side) {
+        return side switch {
+            AreaMode.Normal => ASideFull,
+            AreaMode.BSide  => BSideFull,
+            AreaMode.CSide  => CSideFull,
+            _ => ""
+        };
+    }
+
+    public const string OverridesButton        = "MOVEMENT_LINTER_OVERRIDES_BUTTON";
+    public const string OverridesHeader        = "MOVEMENT_LINTER_OVERRIDES_HEADER";
+    public const string AddOverrideSubheader   = "MOVEMENT_LINTER_ADD_OVERRIDE_SUBHEADER";
+    public const string CurrentRoomButton      = "MOVEMENT_LINTER_CURRENT_ROOM_BUTTON";
+    public const string CurrentRoomHint        = "MOVEMENT_LINTER_CURRENT_ROOM_HINT";
+    public const string ChooseRoom             = "MOVEMENT_LINTER_CHOOSE_ROOM";
+    public const string OverridesListSubheader = "MOVEMENT_LINTER_OVERRIDES_LIST_SUBHEADER";
+    public const string OverrideActive         = "MOVEMENT_LINTER_OVERRIDE_ACTIVE";
+    public const string OverrideInactive       = "MOVEMENT_LINTER_OVERRIDE_INACTIVE";
+
+    public const string OverridesClearAllButton = "MOVEMENT_LINTER_OVERRIDES_CLEAR_ALL_BUTTON";
+    public const string OverridesClearAllHeader = "MOVEMENT_LINTER_OVERRIDES_CLEAR_ALL_HEADER";
+
+    public const string DeleteOverridesButton           = "MOVEMENT_LINTER_DELETE_OVERRIDES_BUTTON";
+    public const string DeleteOverridesHintNoLevelSet   = "MOVEMENT_LINTER_DELETE_OVERRIDES_HINT_NO_LEVEL_SET";
+    public const string DeleteOverridesHintWithLevelSet = "MOVEMENT_LINTER_DELETE_OVERRIDES_HINT_WITH_LEVEL_SET";
+    public const string DeleteOverridesHeader           = "MOVEMENT_LINTER_DELETE_OVERRIDES_HEADER";
+    public const string DeleteLevelSetPrompt            = "MOVEMENT_LINTER_DELETE_LEVEL_SET_PROMPT";
+    public const string DeleteChapterPromptNoSide       = "MOVEMENT_LINTER_DELETE_CHAPTER_PROMPT_NO_SIDE";
+    public const string DeleteChapterPromptWithSide     = "MOVEMENT_LINTER_DELETE_CHAPTER_PROMPT_WITH_SIDE";
+    public const string DeleteRoomPromptNoSide          = "MOVEMENT_LINTER_DELETE_ROOM_PROMPT_NO_SIDE";
+    public const string DeleteRoomPromptWithSide        = "MOVEMENT_LINTER_DELETE_ROOM_PROMPT_WITH_SIDE";
 }

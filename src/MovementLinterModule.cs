@@ -6,6 +6,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using YamlDotNet.Serialization;
+using System.Collections.Generic;
 
 namespace Celeste.Mod.MovementLinter;
 
@@ -134,7 +135,10 @@ public class MovementLinterModule : EverestModule {
         IL.Celeste.Player.Render                  += LintResponder.PatchPlayerRender;
         On.Celeste.BadelineOldsite.CanChangeMusic += LintResponder.OnBadelineOldsiteCanChangeMusic;
         IL.Celeste.BadelineOldsite.Added          += LintResponder.PatchBadelineOldsiteAdded;
-        On.Celeste.Level.LoadLevel                += LintResponder.OnLevelLoadLevel;
+        On.Celeste.Level.LoadLevel                += OnLevelLoadLevel;
+
+        // Mods for config
+        IL.Celeste.Level.Update += MovementLinterModuleSettings.PatchLevelUpdate;
     }
 
     public override void Unload() {
@@ -165,7 +169,18 @@ public class MovementLinterModule : EverestModule {
         IL.Celeste.Player.Render                  -= LintResponder.PatchPlayerRender;
         On.Celeste.BadelineOldsite.CanChangeMusic -= LintResponder.OnBadelineOldsiteCanChangeMusic;
         IL.Celeste.BadelineOldsite.Added          -= LintResponder.PatchBadelineOldsiteAdded;
-        On.Celeste.Level.LoadLevel                -= LintResponder.OnLevelLoadLevel;
+        On.Celeste.Level.LoadLevel                -= OnLevelLoadLevel;
+
+        IL.Celeste.Level.Update -= MovementLinterModuleSettings.PatchLevelUpdate;
+    }
+
+    // =================================================================================================================
+    // Combine hooks into one per method
+    private static void OnLevelLoadLevel(On.Celeste.Level.orig_LoadLevel orig, Level level,
+                                         Player.IntroTypes playerIntro, bool isFromLoader) {
+        orig(level, playerIntro, isFromLoader);
+        LintResponder.OnLevelLoadLevel();
+        MovementLinterModuleSettings.LoadOverrides(level);
     }
 
     // =================================================================================================================
@@ -173,7 +188,10 @@ public class MovementLinterModule : EverestModule {
     private static void AddSaveLoadAction() {
         saveLoadAction = new SaveLoadAction(
             saveState: (_, _) => { savedDet = det; },
-            loadState: (_, _) => { det = savedDet; },
+            loadState: (Dictionary<Type, Dictionary<string, object>> _, Level level) => {
+                det = savedDet;
+                MovementLinterModuleSettings.LoadOverrides(level);
+            },
             clearState: null,
             beforeSaveState: null,
             preCloneEntities: null

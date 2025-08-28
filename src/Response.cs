@@ -371,9 +371,7 @@ public class LintResponder {
     }
 
     // =================================================================================================================
-    public static void OnLevelLoadLevel(On.Celeste.Level.orig_LoadLevel orig, Level level,
-                                        Player.IntroTypes playerIntro, bool isFromLoader) {
-        orig(level, playerIntro, isFromLoader);
+    public static void OnLevelLoadLevel() {
         Instance.badelineChaserIdx = 0;
     }
 

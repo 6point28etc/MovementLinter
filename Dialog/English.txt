@@ -21,6 +21,8 @@
 MOVEMENT_LINTER=         Movement Linter
 MOVEMENT_LINTER_ENABLED= Enabled
 MOVEMENT_LINTER_OFF=     Off
+MOVEMENT_LINTER_CONFIRM= Yes
+MOVEMENT_LINTER_CANCEL=  Cancel
 MOVEMENT_LINTER_MODE=    Mode
 MOVEMENT_LINTER_NONE=    None
 
@@ -198,3 +200,37 @@ MOVEMENT_LINTER_BUFFERED_ULTRA_HINT=               Detects ultra attempts that b
 MOVEMENT_LINTER_BUFFERED_ULTRA_ONLY_WHEN_MATTERED= Only Failed Ultras
 MOVEMENT_LINTER_BUFFERED_ULTRA_ALWAYS=             Always
 MOVEMENT_LINTER_BUFFERED_ULTRA_WARN_SINGULAR=      Detected buffered ultra
+
+MOVEMENT_LINTER_LEVEL_SET=                Level set
+MOVEMENT_LINTER_CHAPTER=                  Chapter
+MOVEMENT_LINTER_SIDE=                     Side
+MOVEMENT_LINTER_SIDE_A_SHORT=             A
+MOVEMENT_LINTER_SIDE_B_SHORT=             B
+MOVEMENT_LINTER_SIDE_C_SHORT=             C
+MOVEMENT_LINTER_A_SIDE_FULL=              A-side
+MOVEMENT_LINTER_B_SIDE_FULL=              B-side
+MOVEMENT_LINTER_C_SIDE_FULL=              C-side
+MOVEMENT_LINTER_CHAPTER_WITH_SIDE_FORMAT= {0} {1}
+
+MOVEMENT_LINTER_OVERRIDES_BUTTON=         Configure per-room overrides
+MOVEMENT_LINTER_OVERRIDES_HEADER=         Lint Rule Overrides
+MOVEMENT_LINTER_ADD_OVERRIDE_SUBHEADER=   Add Override
+MOVEMENT_LINTER_CURRENT_ROOM_BUTTON=      Current room
+MOVEMENT_LINTER_CURRENT_ROOM_HINT=        Hint: open this menu from a level to add an override for the current room
+MOVEMENT_LINTER_CHOOSE_ROOM=              Choose room
+MOVEMENT_LINTER_OVERRIDES_LIST_SUBHEADER= Overrides List
+MOVEMENT_LINTER_OVERRIDE_ACTIVE=          Override
+MOVEMENT_LINTER_OVERRIDE_INACTIVE=        Normal
+
+MOVEMENT_LINTER_OVERRIDES_CLEAR_ALL_BUTTON= Clear all
+MOVEMENT_LINTER_OVERRIDES_CLEAR_ALL_HEADER= Clear All Overrides?
+
+MOVEMENT_LINTER_DELETE_OVERRIDES_BUTTON=              Delete
+MOVEMENT_LINTER_DELETE_OVERRIDES_HINT_NO_LEVEL_SET=   Hint: press Journal on a chapter or room submenu to delete
+MOVEMENT_LINTER_DELETE_OVERRIDES_HINT_WITH_LEVEL_SET= Hint: press Journal on a level set, chapter, or room submenu to delete
+MOVEMENT_LINTER_DELETE_OVERRIDES_HEADER=              Delete Overrides
+MOVEMENT_LINTER_DELETE_LEVEL_SET_PROMPT=              Delete all overrides for {0}?
+MOVEMENT_LINTER_DELETE_CHAPTER_PROMPT_NO_SIDE=        Delete all overrides for {0} / {1}?
+MOVEMENT_LINTER_DELETE_CHAPTER_PROMPT_WITH_SIDE=      Delete all overrides for {0} / {1} {2}?
+MOVEMENT_LINTER_DELETE_ROOM_PROMPT_NO_SIDE=           Delete overrides for {0} / {1} / {2}?
+MOVEMENT_LINTER_DELETE_ROOM_PROMPT_WITH_SIDE=         Delete overrides for {0} / {1} {2} / {3}?
