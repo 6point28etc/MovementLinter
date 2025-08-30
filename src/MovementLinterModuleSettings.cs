@@ -242,6 +242,103 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
+    public class LintResponseList : List<LintResponse> {
+        private const int maxResponses = 3;
+
+        public LintResponseList DeepCopy() {
+            LintResponseList copy = [];
+            foreach (LintResponse response in this) {
+                copy.Add(new() {
+                    Option            = response.Option,
+                    DialogCharacter   = response.DialogCharacter,
+                    SFX               = response.SFX,
+                    SpriteColor       = response.SpriteColor,
+                    CustomSpriteColor = response.CustomSpriteColor,
+                    HairColor         = response.HairColor,
+                    CustomHairColor   = response.CustomHairColor,
+                    Hazard            = response.Hazard,
+                });
+            }
+            return copy;
+        }
+
+        public List<TextMenu.Item> MakeMenuItems(bool inGame, TextMenu containingPage,
+                                                 RecursiveSubMenuBase containingSubmenu, float compactRightWidth,
+                                                 bool memorialTextEnabled) {
+            List<TextMenu.Item> items = [];
+
+            // Make add response button and the hint that goes with it, don't add them yet
+            TextMenu.Button addResponseButton = new(Dialog.Clean(DialogIds.AddResponse)){
+                Disabled = (Count >= maxResponses)
+            };
+            ParentAwareEaseInSubHeader removeResponseHint = new(Dialog.Clean(DialogIds.RemoveResponseHint),
+                                                                addResponseButton.Disabled,
+                                                                containingPage, containingSubmenu){ HeightExtra = 0f };
+            addResponseButton.Enter(delegate { removeResponseHint.FadeVisible = true; })
+                             .Leave(delegate { removeResponseHint.FadeVisible = addResponseButton.Disabled; });
+
+            // Make and add response menus for the existing responses from the existing settings
+            foreach (LintResponse response in this) {
+                RecursiveOptionSubMenu responseMenu = response.MakeSubMenu(inGame, containingPage, compactRightWidth,
+                                                                           memorialTextEnabled);
+                SetDeleteResponseBind(response, responseMenu, containingSubmenu, addResponseButton, removeResponseHint);
+                items.Add(responseMenu);
+            };
+
+            // Callback to add a response and its menu
+            addResponseButton.Pressed(delegate {
+                if (Count >= maxResponses) {
+                    // Prevent violating the max responses during the response add animation
+                    // before we've moved ourselves off the button
+                    return;
+                }
+                LintResponse newResponse = new();
+                Add(newResponse);
+                RecursiveOptionSubMenu newResponseMenu = newResponse.MakeSubMenu(inGame, containingPage,
+                                                                                 compactRightWidth,
+                                                                                 memorialTextEnabled);
+                SetDeleteResponseBind(newResponse, newResponseMenu, containingSubmenu, addResponseButton,
+                                      removeResponseHint);
+                containingSubmenu.InsertItem(
+                    containingSubmenu.CurrentMenu.IndexOf(addResponseButton), newResponseMenu, true,
+                    (TextMenu.Item item) => {
+                        // Force the selection off the button after the new response finishes adding
+                        if (addResponseButton.Disabled && containingSubmenu.Current == addResponseButton) {
+                            containingSubmenu.MoveSelection(-1, false, true, out _);
+                        }
+                    });
+                if (Count >= maxResponses) {
+                    addResponseButton.Disabled = true;
+                }
+            });
+
+            // Add the add response button and its hint after all the responses
+            items.Add(addResponseButton);
+            items.Add(removeResponseHint);
+            return items;
+        }
+
+        private void SetDeleteResponseBind(LintResponse response, RecursiveOptionSubMenu responseMenu,
+                                           RecursiveSubMenuBase ruleMenu, TextMenu.Button addResponseButton,
+                                           ParentAwareEaseInSubHeader removeResponseHint) {
+            responseMenu.AltPressed(delegate {
+                if (Count > 1) {
+                    Remove(response);
+                    ruleMenu.RemoveItem(responseMenu, true);
+                    Audio.Play(SFX.ui_main_button_back);
+                    if (Count < maxResponses) {
+                        addResponseButton.Disabled     = false;
+                        removeResponseHint.FadeVisible = false;
+                    }
+                } else {
+                    Audio.Play(SFX.ui_main_button_invalid);
+                }
+            });
+        }
+    }
+    public LintResponseList DefaultResponses { get; set; } = [new()];
+
+    // =================================================================================================================
     /// <summary>
     ///     Base class for all the settings associated with a single heuristic rule / check
     /// </summary>
@@ -250,14 +347,12 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     ///     (bool for a simple on/off toggle, or some enum for a richer set of mode options)
     /// </typeparam>
     public abstract class LintRuleSettings<ModeT> {
-        private const int maxResponses = 3;
-
         private readonly string titleId;
         private readonly string hintId;
 
         public ModeT Mode { get; set; }
-        public bool OverrideActive { get; set; }          = false;
-        public List<LintResponse> Responses { get; set; } = [new()];
+        public bool OverrideActive { get; set; }        = false;
+        public LintResponseList Responses { get; set; } = [new()];
 
         public LintRuleSettings(ModeT defaultMode, string titleId, string hintId) {
             this.Mode    = defaultMode;
@@ -296,77 +391,17 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                                                 preview: modePreview);
             }
 
+            // Add all the items
             ruleMenu.AddItem(ruleHint)
                     .AddItem(modeItem);
             foreach (TextMenu.Item item in MakeUniqueMenuItems(inGame)) {
                 ruleMenu.AddItem(item);
             }
-
-            // Make add response button and the hint that goes with it, don't add them yet
-            TextMenu.Button addResponseButton = new(Dialog.Clean(DialogIds.AddResponse)){
-                Disabled = (Responses.Count >= maxResponses)
-            };
-            ParentAwareEaseInSubHeader removeResponseHint = new(Dialog.Clean(DialogIds.RemoveResponseHint),
-                                                                addResponseButton.Disabled,
-                                                                topMenu, ruleMenu){ HeightExtra = 0f };
-            addResponseButton.Enter(delegate { removeResponseHint.FadeVisible = true; })
-                             .Leave(delegate { removeResponseHint.FadeVisible = addResponseButton.Disabled; });
-
-            // Make and add response menus for the existing responses from the existing settings
-            foreach (LintResponse response in Responses) {
-                RecursiveOptionSubMenu responseMenu = response.MakeSubMenu(inGame, topMenu, compactRightWidth,
-                                                                           memorialTextEnabled);
-                SetDeleteResponseBind(response, responseMenu, ruleMenu, addResponseButton, removeResponseHint);
-                ruleMenu.AddItem(responseMenu);
-            };
-
-            // Callback to add a response and its menu
-            addResponseButton.Pressed(delegate {
-                if (Responses.Count >= maxResponses) {
-                    // Prevent violating the max responses during the response add animation
-                    // before we've moved ourselves off the button
-                    return;
-                }
-                LintResponse newResponse = new();
-                Responses.Add(newResponse);
-                RecursiveOptionSubMenu newResponseMenu = newResponse.MakeSubMenu(inGame, topMenu, compactRightWidth,
-                                                                                 memorialTextEnabled);
-                SetDeleteResponseBind(newResponse, newResponseMenu, ruleMenu, addResponseButton, removeResponseHint);
-                ruleMenu.InsertItem(ruleMenu.CurrentMenu.IndexOf(addResponseButton), newResponseMenu, true,
-                                    (TextMenu.Item item) => {
-                                        // Force the selection off the button after the new response finishes adding
-                                        if (addResponseButton.Disabled && ruleMenu.Current == addResponseButton) {
-                                            ruleMenu.MoveSelection(-1, false, true, out _);
-                                        }
-                                    });
-                if (Responses.Count >= maxResponses) {
-                    addResponseButton.Disabled = true;
-                }
-            });
-
-            // Add the add response button and its hint after all the responses
-            ruleMenu.AddItem(addResponseButton);
-            ruleMenu.AddItem(removeResponseHint);
-
+            foreach (TextMenu.Item item in Responses.MakeMenuItems(inGame, topMenu, ruleMenu, compactRightWidth,
+                                                                   memorialTextEnabled)) {
+                ruleMenu.AddItem(item);
+            }
             return ruleMenu;
-        }
-
-        private void SetDeleteResponseBind(LintResponse response, RecursiveOptionSubMenu responseMenu,
-                                           RecursiveSubMenuBase ruleMenu, TextMenu.Button addResponseButton,
-                                           ParentAwareEaseInSubHeader removeResponseHint) {
-            responseMenu.AltPressed(delegate {
-                if (Responses.Count > 1) {
-                    Responses.Remove(response);
-                    ruleMenu.RemoveItem(responseMenu, true);
-                    Audio.Play(SFX.ui_main_button_back);
-                    if (Responses.Count < maxResponses) {
-                        addResponseButton.Disabled     = false;
-                        removeResponseHint.FadeVisible = false;
-                    }
-                } else {
-                    Audio.Play(SFX.ui_main_button_invalid);
-                }
-            });
         }
 
         /// <summary>
@@ -731,6 +766,21 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             ];
         }
 
+        public void SetAllResponses(LintResponseList responses) {
+            JumpReleaseJump.Responses          = responses.DeepCopy();
+            JumpReleaseDash.Responses          = responses.DeepCopy();
+            JumpReleaseExit.Responses          = responses.DeepCopy();
+            MoveAfterLand.Responses            = responses.DeepCopy();
+            MoveAfterGainControl.Responses     = responses.DeepCopy();
+            DashAfterUpEntry.Responses         = responses.DeepCopy();
+            FastBubble.Responses               = responses.DeepCopy();
+            ReleaseWBeforeDash.Responses       = responses.DeepCopy();
+            FastfallGlitchBeforeDash.Responses = responses.DeepCopy();
+            TurnBeforeWallkick.Responses       = responses.DeepCopy();
+            ShortWallboost.Responses           = responses.DeepCopy();
+            BufferedUltra.Responses            = responses.DeepCopy();
+        }
+
         public JumpReleaseJumpSettings JumpReleaseJump { get; set; }                   = new();
         public JumpReleaseDashSettings JumpReleaseDash { get; set; }                   = new();
         public JumpReleaseExitSettings JumpReleaseExit { get; set; }                   = new();
@@ -903,11 +953,61 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             mainSubMenu.AddItem(ruleMenu);
         }
 
+        mainSubMenu.AddItem(new TextMenu.Button(Dialog.Clean(DialogIds.SetDefaultResponsesButton)).Pressed(delegate {
+            MakeDefaultResponsesPage(inGame, menu, mainSubMenu, mainEnable.RightWidth(), MemorialTextEnabled,
+                                     mainSubMenu).Enter();
+        }));
+
         TextMenuPage overridesPage = MakeOverridesPage(menu, mainSubMenu, inGame);
         mainSubMenu.AddItem(new TextMenu.Button(Dialog.Clean(DialogIds.OverridesButton)).Pressed(overridesPage.Enter));
 
         menu.Add(mainEnable);
         menu.Add(mainSubMenu);
+    }
+
+    // =================================================================================================================
+    private TextMenuPage MakeDefaultResponsesPage(bool inGame, TextMenu parent, RecursiveSubMenuBase submenuParent,
+                                                  float compactRightWidth, bool memorialTextEnabled,
+                                                  RecursiveNakedSubMenu mainSubmenu) {
+        TextMenuPage page = new(parent, submenuParent){ InnerContent = TextMenu.InnerContentMode.TwoColumn };
+        page.Add(new TextMenu.Header(Dialog.Clean(DialogIds.SetDefaultResponsesHeader)));
+        page.Add(new TextMenu.SubHeader(Dialog.Clean(DialogIds.SetDefaultResponsesHint)){ TopPadding = false });
+
+        // Putting all the responses in an otherwise-pointless invisible submenu just to leverage the smooth
+        // add / remove animations so I don't have to add them to TextMenuPage
+        RecursiveNakedSubMenu dummySubmenu = new(initiallyExpanded: true);
+        LintResponseList workingCopy       = DefaultResponses.DeepCopy();
+        foreach (TextMenu.Item item in workingCopy.MakeMenuItems(inGame, page, dummySubmenu, compactRightWidth,
+                                                                 memorialTextEnabled)) {
+            dummySubmenu.AddItem(item);
+        }
+        page.Add(dummySubmenu);
+
+        page.Add(new TextMenu.Button(Dialog.Clean(DialogIds.Apply)).Pressed(delegate {
+            DefaultResponses = workingCopy;
+            BaseRules.SetAllResponses(DefaultResponses);
+            RefreshBaseRulesMenus(inGame, parent, mainSubmenu, compactRightWidth);
+            page.Return();
+        }));
+        page.Add(new TextMenu.Button(Dialog.Clean(DialogIds.Cancel)).Pressed(page.Return));
+
+        return page;
+    }
+
+    // =================================================================================================================
+    private void RefreshBaseRulesMenus(bool inGame, TextMenu topMenu, RecursiveNakedSubMenu mainSubmenu,
+                                       float compactRightWidth) {
+        // This is fragile but I'm fine with that for now (it relies on the current menu structure where there's a naked
+        // submenu at the top-level which contains all the lint rule submenus first, followed by a non-submenu item)
+        while (mainSubmenu.CurrentMenu[0] is RecursiveSubMenu ruleMenu) {
+            mainSubmenu.RemoveItem(ruleMenu);
+        }
+        List<RecursiveSubMenuBase> ruleMenus = BaseRules.MakeSubMenus(inGame, topMenu, compactRightWidth,
+                                                                      MemorialTextEnabled, false);
+        ruleMenus.Reverse();
+        foreach (RecursiveSubMenuBase ruleMenu in ruleMenus) {
+            mainSubmenu.InsertItem(0, ruleMenu, false, null);
+        }
     }
 
     // =================================================================================================================
@@ -1197,6 +1297,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         }
         if (!Overrides[levelSet][chapterTag].ContainsKey(room)) {
             Overrides[levelSet][chapterTag][room] = new();
+            Overrides[levelSet][chapterTag][room].SetAllResponses(DefaultResponses);
         }
         RefreshOverridesMenus(inGame, page, lastNonOverrideItem, levelSet, chapterTag, room, true, snapScroll);
     }

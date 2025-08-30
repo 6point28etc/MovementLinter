@@ -5,6 +5,7 @@ public static class DialogIds {
     public const string Enabled        = "MOVEMENT_LINTER_ENABLED";
     public const string Off            = "MOVEMENT_LINTER_OFF";
     public const string Confirm        = "MOVEMENT_LINTER_CONFIRM";
+    public const string Apply          = "MOVEMENT_LINTER_APPLY";
     public const string Cancel         = "MOVEMENT_LINTER_CANCEL";
     public const string Mode           = "MOVEMENT_LINTER_MODE";
     public const string None           = "MOVEMENT_LINTER_NONE";
@@ -161,6 +162,10 @@ public static class DialogIds {
     public const string BufferedUltraOnlyWhenMattered = "MOVEMENT_LINTER_BUFFERED_ULTRA_ONLY_WHEN_MATTERED";
     public const string BufferedUltraAlways           = "MOVEMENT_LINTER_BUFFERED_ULTRA_ALWAYS";
     public const string BufferedUltraWarn             = "MOVEMENT_LINTER_BUFFERED_ULTRA_WARN_SINGULAR";
+
+    public const string SetDefaultResponsesButton = "MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_BUTTON";
+    public const string SetDefaultResponsesHeader = "MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HEADER";
+    public const string SetDefaultResponsesHint   = "MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HINT";
 
     public const string LevelSet              = "MOVEMENT_LINTER_LEVEL_SET";
     public const string Chapter               = "MOVEMENT_LINTER_CHAPTER";

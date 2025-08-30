@@ -22,6 +22,7 @@ MOVEMENT_LINTER=         Movement Linter
 MOVEMENT_LINTER_ENABLED= Enabled
 MOVEMENT_LINTER_OFF=     Off
 MOVEMENT_LINTER_CONFIRM= Yes
+MOVEMENT_LINTER_APPLY=   Apply
 MOVEMENT_LINTER_CANCEL=  Cancel
 MOVEMENT_LINTER_MODE=    Mode
 MOVEMENT_LINTER_NONE=    None
@@ -200,6 +201,11 @@ MOVEMENT_LINTER_BUFFERED_ULTRA_HINT=               Detects ultra attempts that b
 MOVEMENT_LINTER_BUFFERED_ULTRA_ONLY_WHEN_MATTERED= Only Failed Ultras
 MOVEMENT_LINTER_BUFFERED_ULTRA_ALWAYS=             Always
 MOVEMENT_LINTER_BUFFERED_ULTRA_WARN_SINGULAR=      Detected buffered ultra
+
+MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_BUTTON= Set default responses
+MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HEADER= Set Default Responses
+MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HINT=   Pressing Apply will set the responses for all base rules and new overrides.
+                                              It will not affect any existing overrides.
 
 MOVEMENT_LINTER_LEVEL_SET=                Level set
 MOVEMENT_LINTER_CHAPTER=                  Chapter
