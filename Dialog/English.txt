@@ -207,6 +207,11 @@ MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HEADER= Set Default Responses
 MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HINT=   Pressing Apply will set the responses for all base rules and new overrides.
                                               It will not affect any existing overrides.
 
+MOVEMENT_LINTER_RESET_TO_DEFAULTS_BUTTON= Reset to defaults
+MOVEMENT_LINTER_RESET_TO_DEFAULTS_HEADER= Reset to Defaults?
+MOVEMENT_LINTER_RESET_TO_DEFAULTS_HINT=   This will reset all base rules and the default responses.
+                                          It will not affect any overrides.
+
 MOVEMENT_LINTER_LEVEL_SET=                Level set
 MOVEMENT_LINTER_CHAPTER=                  Chapter
 MOVEMENT_LINTER_SIDE=                     Side

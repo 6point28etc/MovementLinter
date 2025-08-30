@@ -941,6 +941,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
     // =================================================================================================================
     public void CreateMenu(TextMenu menu, bool inGame) {
+        // Enable toggle
         BetterWidthOnOff mainEnable       = new(Dialog.Clean(DialogIds.Enabled), Enabled);
         RecursiveNakedSubMenu mainSubMenu = new(initiallyExpanded: Enabled, compactRightWidth: mainEnable.RightWidth());
         mainEnable.Change((bool val) => {
@@ -948,16 +949,24 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             mainSubMenu.Expanded = val;
         });
 
+        // Base rules
         foreach (RecursiveSubMenuBase ruleMenu in BaseRules.MakeSubMenus(inGame, menu, mainEnable.RightWidth(),
                                                                          MemorialTextEnabled, false)) {
             mainSubMenu.AddItem(ruleMenu);
         }
 
+        // Set default responses button
         mainSubMenu.AddItem(new TextMenu.Button(Dialog.Clean(DialogIds.SetDefaultResponsesButton)).Pressed(delegate {
             MakeDefaultResponsesPage(inGame, menu, mainSubMenu, mainEnable.RightWidth(), MemorialTextEnabled,
                                      mainSubMenu).Enter();
         }));
 
+        // Reset to defaults button
+        mainSubMenu.AddItem(new TextMenu.Button(Dialog.Clean(DialogIds.ResetToDefaultsButton)).Pressed(delegate {
+            MakeResetToDefaultsPage(inGame, menu, mainSubMenu, mainEnable.RightWidth(), mainSubMenu).Enter();
+        }));
+
+        // Overrides
         TextMenuPage overridesPage = MakeOverridesPage(menu, mainSubMenu, inGame);
         mainSubMenu.AddItem(new TextMenu.Button(Dialog.Clean(DialogIds.OverridesButton)).Pressed(overridesPage.Enter));
 
@@ -1008,6 +1017,23 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         foreach (RecursiveSubMenuBase ruleMenu in ruleMenus) {
             mainSubmenu.InsertItem(0, ruleMenu, false, null);
         }
+    }
+
+    // =================================================================================================================
+    private TextMenuPage MakeResetToDefaultsPage(bool inGame, TextMenu parent, RecursiveSubMenuBase submenuParent,
+                                                 float compactRightWidth, RecursiveNakedSubMenu mainSubmenu) {
+        TextMenuPage page = new(parent, submenuParent);
+        page.Add(new TextMenu.Header(Dialog.Clean(DialogIds.ResetToDefaultsHeader)));
+        page.Add(new TextMenu.SubHeader(Dialog.Clean(DialogIds.ResetToDefaultsHint)){ TopPadding = false });
+        page.Add(new TextMenu.Button(Dialog.Clean(DialogIds.Confirm)).Pressed(delegate {
+            BaseRules        = new();
+            DefaultResponses = [new()];
+            RefreshBaseRulesMenus(inGame, parent, mainSubmenu, compactRightWidth);
+            page.Return();
+        }));
+        page.Add(new TextMenu.Button(Dialog.Clean(DialogIds.Cancel)).Pressed(page.Return));
+        page.Selection = 3;  // Select cancel button
+        return page;
     }
 
     // =================================================================================================================

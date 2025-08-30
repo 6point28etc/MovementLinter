@@ -167,6 +167,10 @@ public static class DialogIds {
     public const string SetDefaultResponsesHeader = "MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HEADER";
     public const string SetDefaultResponsesHint   = "MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HINT";
 
+    public const string ResetToDefaultsButton = "MOVEMENT_LINTER_RESET_TO_DEFAULTS_BUTTON";
+    public const string ResetToDefaultsHeader = "MOVEMENT_LINTER_RESET_TO_DEFAULTS_HEADER";
+    public const string ResetToDefaultsHint   = "MOVEMENT_LINTER_RESET_TO_DEFAULTS_HINT";
+
     public const string LevelSet              = "MOVEMENT_LINTER_LEVEL_SET";
     public const string Chapter               = "MOVEMENT_LINTER_CHAPTER";
     public const string Side                  = "MOVEMENT_LINTER_SIDE";
