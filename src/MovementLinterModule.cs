@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Celeste.Mod.SpeedrunTool.SaveLoad;
+using Celeste.Mod.TasTestSuite;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
@@ -280,6 +281,9 @@ public class MovementLinterModule : EverestModule {
 
         // Poll any responses that need or want the player to exist or that have something to do every frame
         res.ProcessPendingResponses(player);
+
+        // Poll the self-test engine
+        TestSuite.Update(player);
     }
 
     // =================================================================================================================

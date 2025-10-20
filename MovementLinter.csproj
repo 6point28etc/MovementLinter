@@ -24,6 +24,7 @@
         <Reference Include="$(LibPath)\Celeste.dll"></Reference>
         <Reference Include="$(LibPath)\MMHOOK_Celeste.dll"></Reference>
         <Reference Include="$(LibPath)\SpeedrunTool.dll"></Reference>
+        <Reference Include="$(LibPath)\CelesteTAS.dll"></Reference>
     </ItemGroup>
 
     <ItemGroup>

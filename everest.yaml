@@ -7,3 +7,5 @@
   OptionalDependencies:
     - Name: SpeedrunTool
       Version: 3.7.11
+    - Name: CelesteTAS
+      Version: 3.16.7

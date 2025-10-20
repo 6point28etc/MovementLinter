@@ -1,3 +1,6 @@
 [submodule "MenuTools"]
 	path = MenuTools
 	url = ./MenuTools
+[submodule "TasTestSuite"]
+	path = TasTestSuite
+	url = ./TasTestSuite/
