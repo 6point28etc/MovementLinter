@@ -22,7 +22,9 @@
  * SOFTWARE.
  */
 
+using System;
 using System.Collections;
+using System.Linq;
 using Celeste.Mod.SpeedrunTool.SaveLoad;
 using Microsoft.Xna.Framework;
 using Monocle;
@@ -30,6 +32,9 @@ using Monocle;
 namespace Celeste.Mod.MovementLinter;
 
 public class Tooltip : Entity {
+    private static readonly Lazy<bool> speedrunToolIsLoaded = new(() =>
+        Everest.Modules.Any((EverestModule module) => module.Metadata.Name == "SpeedrunTool"));
+
     // 0 bits indicate slots that are currently filled, 1 bits indicate empty slots.
     private static uint freeHeightsMask = 0xFFFF_FFFF;
 
@@ -49,6 +54,12 @@ public class Tooltip : Entity {
                                         Engine.Height - (heightIndex + 1) * (ActiveFont.LineHeight + Padding / 2f));
         Tag = Tags.HUD | Tags.Global | Tags.FrozenUpdate | Tags.PauseUpdate| Tags.TransitionUpdate;
         Add(new Coroutine(Show()));
+        if (speedrunToolIsLoaded.Value) {
+            IgnoreSaveLoad();
+        }
+    }
+
+    private void IgnoreSaveLoad() {
         Add(new IgnoreSaveLoadComponent());
     }
 
