@@ -38,8 +38,8 @@ public class LintResponder {
     private bool memorialTextDrawn  = false;
 
     // =================================================================================================================
-    public void DoLintResponses<ModeT>(MovementLinterModuleSettings.LintRuleSettings<ModeT> lintRuleSettings,
-                                       string singularWarnId, string pluralWarnId, int warnParam) {
+    public void DoLintResponses(MovementLinterModuleSettings.LintRuleSettings lintRuleSettings,
+                                string singularWarnId, string pluralWarnId, int warnParam) {
         if (!MovementLinterModule.Settings.Enabled || !lintRuleSettings.IsEnabled()) {
             return;
         }

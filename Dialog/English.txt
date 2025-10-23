@@ -202,6 +202,17 @@ MOVEMENT_LINTER_BUFFERED_ULTRA_ONLY_WHEN_MATTERED= Only Failed Ultras
 MOVEMENT_LINTER_BUFFERED_ULTRA_ALWAYS=             Always
 MOVEMENT_LINTER_BUFFERED_ULTRA_WARN_SINGULAR=      Detected buffered ultra
 
+MOVEMENT_LINTER_ENABLE_DISABLE_ALL_BUTTON=   Enable / disable all
+MOVEMENT_LINTER_ENABLE_DISABLE_ALL_HEADER=   Enable / Disable All
+MOVEMENT_LINTER_ENABLE_DISABLE_ALL_HINT=     Pressing Apply will enable or disable all base rules.
+                                             It will not affect any overrides.
+MOVEMENT_LINTER_ENABLE_DISABLE_ALL_SELECT=   Enable / Disable
+MOVEMENT_LINTER_DISABLE_ALL=                 Disable
+MOVEMENT_LINTER_ENABLE_ALL_RECOMMENDED=      Enable (recommended levels)
+MOVEMENT_LINTER_ENABLE_ALL_MAX=              Enable (maximum levels)
+MOVEMENT_LINTER_ENABLE_ALL_RECOMMENDED_HINT= For rules with multiple modes, enable with the recommended mode
+MOVEMENT_LINTER_ENABLE_ALL_MAX_HINT=         For rules with multiple modes, enable with the strictest possible mode
+
 MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_BUTTON= Set default responses
 MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HEADER= Set Default Responses
 MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HINT=   Pressing Apply will set the responses for all base rules and new overrides.

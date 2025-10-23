@@ -163,6 +163,16 @@ public static class DialogIds {
     public const string BufferedUltraAlways           = "MOVEMENT_LINTER_BUFFERED_ULTRA_ALWAYS";
     public const string BufferedUltraWarn             = "MOVEMENT_LINTER_BUFFERED_ULTRA_WARN_SINGULAR";
 
+    public const string EnableDisableAllButton   = "MOVEMENT_LINTER_ENABLE_DISABLE_ALL_BUTTON";
+    public const string EnableDisableAllHeader   = "MOVEMENT_LINTER_ENABLE_DISABLE_ALL_HEADER";
+    public const string EnableDisableAllHint     = "MOVEMENT_LINTER_ENABLE_DISABLE_ALL_HINT";
+    public const string EnableDisableAllSelect   = "MOVEMENT_LINTER_ENABLE_DISABLE_ALL_SELECT";
+    public const string DisableAll               = "MOVEMENT_LINTER_DISABLE_ALL";
+    public const string EnableAllRecommended     = "MOVEMENT_LINTER_ENABLE_ALL_RECOMMENDED";
+    public const string EnableAllMax             = "MOVEMENT_LINTER_ENABLE_ALL_MAX";
+    public const string EnableAllRecommendedHint = "MOVEMENT_LINTER_ENABLE_ALL_RECOMMENDED_HINT";
+    public const string EnableAllMaxHint         = "MOVEMENT_LINTER_ENABLE_ALL_MAX_HINT";
+
     public const string SetDefaultResponsesButton = "MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_BUTTON";
     public const string SetDefaultResponsesHeader = "MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HEADER";
     public const string SetDefaultResponsesHint   = "MOVEMENT_LINTER_SET_DEFAULT_RESPONSES_HINT";

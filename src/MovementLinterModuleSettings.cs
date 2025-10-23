@@ -342,20 +342,14 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     /// <summary>
     ///     Base class for all the settings associated with a single heuristic rule / check
     /// </summary>
-    /// <typeparam name="ModeT">
-    ///     Type of the "mode" setting for this rule
-    ///     (bool for a simple on/off toggle, or some enum for a richer set of mode options)
-    /// </typeparam>
-    public abstract class LintRuleSettings<ModeT> {
+    public abstract class LintRuleSettings {
         private readonly string titleId;
         private readonly string hintId;
 
-        public ModeT Mode { get; set; }
         public bool OverrideActive { get; set; }        = false;
         public LintResponseList Responses { get; set; } = [new()];
 
-        public LintRuleSettings(ModeT defaultMode, string titleId, string hintId) {
-            this.Mode    = defaultMode;
+        public LintRuleSettings(string titleId, string hintId) {
             this.titleId = titleId;
             this.hintId  = hintId;
         }
@@ -368,10 +362,9 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         /// <param name="compactRightWidth">The right-width to use in compact mode</param>
         public RecursiveSubMenuBase MakeSubMenu(bool inGame, TextMenu topMenu, float compactRightWidth,
                                                 bool memorialTextEnabled, bool isOverrideMenu) {
-            // Hint, mode
+            // Hint, mode, preview
             TextMenuExt.EaseInSubHeaderExt ruleHint = new(Dialog.Clean(hintId), true, topMenu){ HeightExtra = 0f };
-            BetterWidthOption<ModeT> modeItem = MakeModeMenuItem();
-            modeItem.Change((ModeT val) => Mode = val);
+            MakeModeMenuItems(out TextMenu.Item modeItem, out ISubMenuPreview modePreview);
 
             // Make the submenu now since we need to manipulate it from the response items
             RecursiveSubMenuBase ruleMenu;
@@ -386,7 +379,6 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                 ruleMenu = ruleOptionMenu;
             } else {
                 // Make a normal submenu and preview the mode if we're a base rule menu
-                OptionPreview<ModeT> modePreview = new(modeItem);
                 ruleMenu = new RecursiveSubMenu(label: Dialog.Clean(titleId), compactRightWidth: compactRightWidth,
                                                 preview: modePreview);
             }
@@ -410,9 +402,24 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         public abstract bool IsEnabled();
 
         /// <summary>
-        ///     Make the menu widget that controls the <see cref="Mode"/> property
+        ///     Set the mode of this rule to disable it
         /// </summary>
-        protected abstract BetterWidthOption<ModeT> MakeModeMenuItem();
+        public abstract void Disable();
+
+        /// <summary>
+        ///     Set the mode of this rule to enable it to the recommended level
+        /// </summary>
+        public abstract void EnableRecommended();
+
+        /// <summary>
+        ///     Set the mode of this rule to enable it to the maximum level
+        /// </summary>
+        public abstract void EnableMax();
+
+        /// <summary>
+        ///     Make the menu widget to control the mode, and the widget to preview the mode for the submenu header
+        /// </summary>
+        protected abstract void MakeModeMenuItems(out TextMenu.Item modeItem, out ISubMenuPreview modePreview);
 
         /// <summary>
         ///     Make any additional menu widgets to control properties not defined in the base class
@@ -422,16 +429,57 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class JumpReleaseJumpSettings : LintRuleSettings<bool> {
-        public int Frames { get; set; } = 2;
+    /// <summary>
+    ///     The mode-related parts of the base lint rule settings behavior are split out here to have a non-templated
+    ///     base class
+    /// </summary>
+    /// <typeparam name="ModeT">
+    ///     Type of the "mode" setting for this rule
+    ///     (bool for a simple on/off toggle, or some enum for a richer set of mode options)
+    /// </typeparam>
+    public abstract class LintRuleSettingsTemplate<ModeT> : LintRuleSettings {
+        public ModeT Mode { get; set; }
 
-        public JumpReleaseJumpSettings() : base(true, DialogIds.JumpReleaseJump, DialogIds.JumpReleaseJumpHint) {}
+        public LintRuleSettingsTemplate(ModeT defaultMode, string titleId, string hintId) : base(titleId, hintId) {
+            Mode = defaultMode;
+        }
+
+        protected override void MakeModeMenuItems(out TextMenu.Item modeItem, out ISubMenuPreview modePreview) {
+            BetterWidthOption<ModeT> modeSlider = MakeModeMenuItem();
+            modeSlider.Change((ModeT val) => Mode = val);
+            modeItem    = modeSlider;
+            modePreview = new OptionPreview<ModeT>(modeSlider);
+        }
+
+        /// <summary>
+        ///     Make the menu widget that controls the <see cref="Mode"/> property
+        /// </summary>
+        protected abstract BetterWidthOption<ModeT> MakeModeMenuItem();
+    }
+
+    // =================================================================================================================
+    /// <summary>
+    ///     Common behavior for settings with a simple on/off mode
+    /// </summary>
+    public abstract class LintRuleSettingsBool : LintRuleSettingsTemplate<bool> {
+        public LintRuleSettingsBool(bool defaultMode, string titleId, string hintId)
+            : base(defaultMode, titleId, hintId) {}
 
         public override bool IsEnabled() => Mode;
+        public override void Disable() { Mode = false; }
+        public override void EnableRecommended() { Mode = true; }
+        public override void EnableMax() { Mode = true; }
 
         protected override BetterWidthOption<bool> MakeModeMenuItem() {
             return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
         }
+    }
+
+    // =================================================================================================================
+    public class JumpReleaseJumpSettings : LintRuleSettingsBool {
+        public int Frames { get; set; } = 2;
+
+        public JumpReleaseJumpSettings() : base(true, DialogIds.JumpReleaseJump, DialogIds.JumpReleaseJumpHint) {}
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
@@ -447,16 +495,10 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class JumpReleaseDashSettings : LintRuleSettings<bool>{
+    public class JumpReleaseDashSettings : LintRuleSettingsBool {
         public int Frames { get; set; } = 3;
 
         public JumpReleaseDashSettings() : base(true, DialogIds.JumpReleaseDash, DialogIds.JumpReleaseDashHint) {}
-
-        public override bool IsEnabled() => Mode;
-
-        protected override BetterWidthOption<bool> MakeModeMenuItem() {
-            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
-        }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
@@ -472,13 +514,16 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class JumpReleaseExitSettings : LintRuleSettings<TransitionDirection> {
+    public class JumpReleaseExitSettings : LintRuleSettingsTemplate<TransitionDirection> {
         public int Frames { get; set; } = 6;
 
         public JumpReleaseExitSettings()
             : base(TransitionDirection.UpOnly, DialogIds.JumpReleaseExit, DialogIds.JumpReleaseExitHint) {}
 
         public override bool IsEnabled() => Mode != TransitionDirection.None;
+        public override void Disable() { Mode = TransitionDirection.None; }
+        public override void EnableRecommended() { Mode = TransitionDirection.UpOnly; }
+        public override void EnableMax() { Mode = TransitionDirection.Any; }
 
         protected override BetterWidthOption<TransitionDirection> MakeModeMenuItem() {
             BetterWidthOption<TransitionDirection> item = new(Dialog.Clean(DialogIds.JumpReleaseExitDirection));
@@ -507,7 +552,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class MoveAfterLandSettings : LintRuleSettings<MoveAfterLandMode> {
+    public class MoveAfterLandSettings : LintRuleSettingsTemplate<MoveAfterLandMode> {
         public bool IgnoreUltras { get; set; } = true;
         public int Frames { get; set; }        = 3;
 
@@ -515,6 +560,9 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             : base(MoveAfterLandMode.DashOnly, DialogIds.MoveAfterLand, DialogIds.MoveAfterLandHint) {}
 
         public override bool IsEnabled() => Mode != MoveAfterLandMode.Disabled;
+        public override void Disable() { Mode = MoveAfterLandMode.Disabled; }
+        public override void EnableRecommended() { Mode = MoveAfterLandMode.DashOnly; }
+        public override void EnableMax() { Mode = MoveAfterLandMode.DashOrJump; }
 
         protected override BetterWidthOption<MoveAfterLandMode> MakeModeMenuItem() {
             BetterWidthOption<MoveAfterLandMode> item = new(Dialog.Clean(DialogIds.MoveAfterLandMode));
@@ -545,17 +593,11 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class MoveAfterGainControlSettings : LintRuleSettings<bool>{
+    public class MoveAfterGainControlSettings : LintRuleSettingsBool {
         public int Frames { get; set; } = 3;
 
         public MoveAfterGainControlSettings()
             : base(true, DialogIds.MoveAfterGainControl, DialogIds.MoveAfterGainControlHint) {}
-
-        public override bool IsEnabled() => Mode;
-
-        protected override BetterWidthOption<bool> MakeModeMenuItem() {
-            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
-        }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
@@ -571,16 +613,10 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class DashAfterUpEntrySettings : LintRuleSettings<bool>{
+    public class DashAfterUpEntrySettings : LintRuleSettingsBool {
         public int Frames { get; set; } = 3;
 
         public DashAfterUpEntrySettings() : base(true, DialogIds.DashAfterUpEntry, DialogIds.DashAfterUpEntryHint) {}
-
-        public override bool IsEnabled() => Mode;
-
-        protected override BetterWidthOption<bool> MakeModeMenuItem() {
-            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
-        }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
@@ -596,16 +632,10 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class FastBubbleSettings : LintRuleSettings<bool> {
+    public class FastBubbleSettings : LintRuleSettingsBool {
         public int Frames { get; set; } = 5;
 
         public FastBubbleSettings() : base(true, DialogIds.FastBubble, DialogIds.FastBubbleHint) {}
-
-        public override bool IsEnabled() => Mode;
-
-        protected override BetterWidthOption<bool> MakeModeMenuItem() {
-            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
-        }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
@@ -621,17 +651,11 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class ReleaseWBeforeDashSettings : LintRuleSettings<bool>{
+    public class ReleaseWBeforeDashSettings : LintRuleSettingsBool {
         public int Frames { get; set; } = 4;
 
         public ReleaseWBeforeDashSettings()
             : base(true, DialogIds.ReleaseWBeforeDash, DialogIds.ReleaseWBeforeDashHint) {}
-
-        public override bool IsEnabled() => Mode;
-
-        protected override BetterWidthOption<bool> MakeModeMenuItem() {
-            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
-        }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
@@ -647,17 +671,11 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class FastfallGlitchBeforeDashSettings : LintRuleSettings<bool>{
+    public class FastfallGlitchBeforeDashSettings : LintRuleSettingsBool {
         public int Frames { get; set; } = 4;
 
         public FastfallGlitchBeforeDashSettings()
             : base(true, DialogIds.FastfallGlitchBeforeDash, DialogIds.FastfallGlitchBeforeDashHint) {}
-
-        public override bool IsEnabled() => Mode;
-
-        protected override BetterWidthOption<bool> MakeModeMenuItem() {
-            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
-        }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
@@ -673,17 +691,11 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class TurnBeforeWallkickSettings : LintRuleSettings<bool>{
+    public class TurnBeforeWallkickSettings : LintRuleSettingsBool {
         public int Frames { get; set; } = 4;
 
         public TurnBeforeWallkickSettings()
             : base(true, DialogIds.TurnBeforeWallkick, DialogIds.TurnBeforeWallkickHint) {}
-
-        public override bool IsEnabled() => Mode;
-
-        protected override BetterWidthOption<bool> MakeModeMenuItem() {
-            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
-        }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
@@ -699,16 +711,10 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class ShortWallboostSettings : LintRuleSettings<bool>{
+    public class ShortWallboostSettings : LintRuleSettingsBool {
         public int Frames { get; set; } = 3;
 
         public ShortWallboostSettings() : base(true, DialogIds.ShortWallboost, DialogIds.ShortWallboostHint) {}
-
-        public override bool IsEnabled() => Mode;
-
-        protected override BetterWidthOption<bool> MakeModeMenuItem() {
-            return new BetterWidthOnOff(Dialog.Clean(DialogIds.Enabled), Mode);
-        }
 
         protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
             return [
@@ -724,11 +730,14 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
-    public class BufferedUltraSettings : LintRuleSettings<BufferedUltraMode> {
+    public class BufferedUltraSettings : LintRuleSettingsTemplate<BufferedUltraMode> {
         public BufferedUltraSettings()
             : base(BufferedUltraMode.OnlyWhenMattered, DialogIds.BufferedUltra, DialogIds.BufferedUltraHint) {}
 
         public override bool IsEnabled() => Mode != BufferedUltraMode.Disabled;
+        public override void Disable() { Mode = BufferedUltraMode.Disabled; }
+        public override void EnableRecommended() { Mode = BufferedUltraMode.OnlyWhenMattered; }
+        public override void EnableMax() { Mode = BufferedUltraMode.Always; }
 
         protected override BetterWidthOption<BufferedUltraMode> MakeModeMenuItem() {
             BetterWidthOption<BufferedUltraMode> item = new(Dialog.Clean(DialogIds.Mode));
@@ -748,37 +757,52 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
     // =================================================================================================================
     public class LintRules {
+        private List<LintRuleSettings> AllRules => [
+            JumpReleaseJump,
+            JumpReleaseDash,
+            JumpReleaseExit,
+            MoveAfterLand,
+            MoveAfterGainControl,
+            DashAfterUpEntry,
+            FastBubble,
+            ReleaseWBeforeDash,
+            FastfallGlitchBeforeDash,
+            TurnBeforeWallkick,
+            ShortWallboost,
+            BufferedUltra,
+        ];
+
         public List<RecursiveSubMenuBase> MakeSubMenus(bool inGame, TextMenu topMenu, float rightWidth,
                                                        bool memorialTextEnabled, bool overrides) {
-            return [
-                JumpReleaseJump.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                JumpReleaseDash.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                JumpReleaseExit.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                MoveAfterLand.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                MoveAfterGainControl.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                DashAfterUpEntry.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                FastBubble.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                ReleaseWBeforeDash.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                FastfallGlitchBeforeDash.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                TurnBeforeWallkick.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                ShortWallboost.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-                BufferedUltra.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides),
-            ];
+            List<RecursiveSubMenuBase> menusList = [];
+            foreach (LintRuleSettings rule in AllRules) {
+                menusList.Add(rule.MakeSubMenu(inGame, topMenu, rightWidth, memorialTextEnabled, overrides));
+            }
+            return menusList;
         }
 
         public void SetAllResponses(LintResponseList responses) {
-            JumpReleaseJump.Responses          = responses.DeepCopy();
-            JumpReleaseDash.Responses          = responses.DeepCopy();
-            JumpReleaseExit.Responses          = responses.DeepCopy();
-            MoveAfterLand.Responses            = responses.DeepCopy();
-            MoveAfterGainControl.Responses     = responses.DeepCopy();
-            DashAfterUpEntry.Responses         = responses.DeepCopy();
-            FastBubble.Responses               = responses.DeepCopy();
-            ReleaseWBeforeDash.Responses       = responses.DeepCopy();
-            FastfallGlitchBeforeDash.Responses = responses.DeepCopy();
-            TurnBeforeWallkick.Responses       = responses.DeepCopy();
-            ShortWallboost.Responses           = responses.DeepCopy();
-            BufferedUltra.Responses            = responses.DeepCopy();
+            foreach (LintRuleSettings rule in AllRules) {
+                rule.Responses = responses.DeepCopy();
+            }
+        }
+
+        public void DisableAll() {
+            foreach (LintRuleSettings rule in AllRules) {
+                rule.Disable();
+            }
+        }
+
+        public void EnableAllRecommended() {
+            foreach (LintRuleSettings rule in AllRules) {
+                rule.EnableRecommended();
+            }
+        }
+
+        public void EnableAllMax() {
+            foreach (LintRuleSettings rule in AllRules) {
+                rule.EnableMax();
+            }
         }
 
         public JumpReleaseJumpSettings JumpReleaseJump { get; set; }                   = new();
@@ -955,6 +979,11 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             mainSubMenu.AddItem(ruleMenu);
         }
 
+        // Enable / disable all button
+        mainSubMenu.AddItem(new TextMenu.Button(Dialog.Clean(DialogIds.EnableDisableAllButton)).Pressed(delegate {
+            MakeEnableDisableAllPage(inGame, menu, mainSubMenu, mainEnable.RightWidth(), mainSubMenu).Enter();
+        }));
+
         // Set default responses button
         mainSubMenu.AddItem(new TextMenu.Button(Dialog.Clean(DialogIds.SetDefaultResponsesButton)).Pressed(delegate {
             MakeDefaultResponsesPage(inGame, menu, mainSubMenu, mainEnable.RightWidth(), MemorialTextEnabled,
@@ -975,6 +1004,58 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
+    private TextMenuPage MakeEnableDisableAllPage(bool inGame, TextMenu parent, RecursiveSubMenuBase submenuParent,
+                                                  float compactRightWidth, RecursiveNakedSubMenu mainSubmenu) {
+        TextMenuPage page = new(parent, submenuParent);
+        page.Add(new TextMenu.Header(Dialog.Clean(DialogIds.EnableDisableAllHeader)));
+        page.Add(new TextMenu.SubHeader(Dialog.Clean(DialogIds.EnableDisableAllHint)){ TopPadding = false });
+
+        // Making a dummy, otherwise pointless submenu to hold the slider purely for the better right-width handling.
+        // This is obviously a gross hack but it's the easiest way to do it and I want to finish this mod.
+        RecursiveNakedSubMenu dummySubmenu    = new(initiallyExpanded: true, compactRightWidth: 0f);
+        BetterWidthSlider enableDisableSelect = new(
+            label  : Dialog.Clean(DialogIds.EnableDisableAllSelect),
+            values : (int val) => { return val switch {
+                0 => Dialog.Clean(DialogIds.DisableAll),
+                1 => Dialog.Clean(DialogIds.EnableAllRecommended),
+                2 => Dialog.Clean(DialogIds.EnableAllMax),
+                _ => ""};
+            },
+            min : 0,
+            max : 2);
+        dummySubmenu.AddItem(enableDisableSelect);
+        page.Add(dummySubmenu);
+        TextMenuExt.EaseInSubHeaderExt enableAllRecommendedHint = new(Dialog.Clean(DialogIds.EnableAllRecommendedHint),
+                                                                      false, page){ HeightExtra = 0f };
+        TextMenuExt.EaseInSubHeaderExt enableAllMaxHint = new(Dialog.Clean(DialogIds.EnableAllMaxHint),
+                                                              false, page){ HeightExtra = 0f };
+        enableDisableSelect.Change((int val) => {
+            enableAllRecommendedHint.FadeVisible = (val == 1);
+            enableAllMaxHint.FadeVisible         = (val == 2);
+        });
+        page.Add(enableAllRecommendedHint);
+        page.Add(enableAllMaxHint);
+        page.Add(new TextMenu.Button(Dialog.Clean(DialogIds.Apply)).Pressed(delegate {
+            switch (enableDisableSelect.Values[enableDisableSelect.Index].Item2) {
+            case 0:
+                BaseRules.DisableAll();
+                break;
+            case 1:
+                BaseRules.EnableAllRecommended();
+                break;
+            case 2:
+                BaseRules.EnableAllMax();
+                break;
+            }
+            RefreshBaseRulesMenus(inGame, parent, mainSubmenu, compactRightWidth);
+            page.Return();
+        }));
+        page.Add(new TextMenu.Button(Dialog.Clean(DialogIds.Cancel)).Pressed(page.Return));
+        page.Selection = 2;  // Select option slider
+        return page;
+    }
+
+    // =================================================================================================================
     private TextMenuPage MakeDefaultResponsesPage(bool inGame, TextMenu parent, RecursiveSubMenuBase submenuParent,
                                                   float compactRightWidth, bool memorialTextEnabled,
                                                   RecursiveNakedSubMenu mainSubmenu) {
@@ -984,7 +1065,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
 
         // Putting all the responses in an otherwise-pointless invisible submenu just to leverage the smooth
         // add / remove animations so I don't have to add them to TextMenuPage
-        RecursiveNakedSubMenu dummySubmenu = new(initiallyExpanded: true);
+        RecursiveNakedSubMenu dummySubmenu = new(initiallyExpanded: true, compactRightWidth: 0f);
         LintResponseList workingCopy       = DefaultResponses.DeepCopy();
         foreach (TextMenu.Item item in workingCopy.MakeMenuItems(inGame, page, dummySubmenu, compactRightWidth,
                                                                  memorialTextEnabled)) {
