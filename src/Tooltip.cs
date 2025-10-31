@@ -44,6 +44,7 @@ public class Tooltip : Entity {
     private readonly int heightIndex;
     private float alpha;
     private float unEasedAlpha;
+    private bool freedSlot = false;
 
     private Tooltip(string message, float shownDurationSeconds, int heightIndex) {
         freeHeightsMask &= (uint) ~(1 << heightIndex);
@@ -56,6 +57,12 @@ public class Tooltip : Entity {
         Add(new Coroutine(Show()));
         if (speedrunToolIsLoaded.Value) {
             IgnoreSaveLoad();
+        }
+    }
+
+    ~Tooltip() {
+        if (!freedSlot) {
+            freeHeightsMask |= (uint) 1 << heightIndex;
         }
     }
 
@@ -82,6 +89,7 @@ public class Tooltip : Entity {
         }
 
         freeHeightsMask |= (uint) 1 << heightIndex;
+        freedSlot = true;
         RemoveSelf();
     }
 
