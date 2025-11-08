@@ -1,0 +1,2 @@
+Position.X 380
+Position.Y -200

@@ -1,0 +1,2 @@
+Position.X 320
+Position.Y -24

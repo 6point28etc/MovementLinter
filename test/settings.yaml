@@ -1,0 +1,50 @@
+Enabled: true
+BaseRules:
+  JumpReleaseJump:
+    Mode: false
+    Responses:
+    - Option: Kill
+  JumpReleaseDash:
+    Mode: false
+    Responses:
+    - Option: Kill
+  JumpReleaseExit:
+    Mode: None
+    Responses:
+    - Option: Kill
+  MoveAfterLand:
+    Mode: Disabled
+    Responses:
+    - Option: Kill
+  MoveAfterGainControl:
+    Mode: false
+    Responses:
+    - Option: Kill
+  DashAfterUpEntry:
+    Mode: false
+    Responses:
+    - Option: Kill
+  FastBubble:
+    Mode: false
+    Responses:
+    - Option: Kill
+  ReleaseWBeforeDash:
+    Mode: false
+    Responses:
+    - Option: Kill
+  FastfallGlitchBeforeDash:
+    Mode: false
+    Responses:
+    - Option: Kill
+  TurnBeforeWallkick:
+    Mode: false
+    Responses:
+    - Option: Kill
+  ShortWallboost:
+    Mode: false
+    Responses:
+    - Option: Kill
+  BufferedUltra:
+    Mode: Disabled
+    Responses:
+    - Option: Kill

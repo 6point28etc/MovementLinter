@@ -1,0 +1,1 @@
+BaseRules.FastfallGlitchBeforeDash.Mode true

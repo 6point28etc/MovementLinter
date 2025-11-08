@@ -1,0 +1,1 @@
+BaseRules.JumpReleaseExit.Mode UpOnly

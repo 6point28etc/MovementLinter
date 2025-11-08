@@ -1,0 +1,1 @@
+BaseRules.DashAfterUpEntry.Mode true

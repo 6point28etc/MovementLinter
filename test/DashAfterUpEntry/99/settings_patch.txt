@@ -1,0 +1,1 @@
+BaseRules.DashAfterUpEntry.Frames 99

@@ -1,0 +1,10 @@
+console load 1 527 -64
+  37
+   7,R,J
+   1,L,J
+console load 1 538 -80
+  37,L
+set,Player.Speed.X,79
+   1,L
+   4,L,K
+  23

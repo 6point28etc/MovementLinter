@@ -1,0 +1,1 @@
+BaseRules.TurnBeforeWallkick.Frames 2

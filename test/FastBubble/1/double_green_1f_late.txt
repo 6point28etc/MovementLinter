@@ -1,0 +1,2 @@
+Position.X 2468
+Position.Y -288
