@@ -5,7 +5,7 @@ namespace Celeste.Mod.MovementLinter;
 
 public static class Commands {
     [Command("linter_selftest", "Run self-test suite for MovementLinter")]
-    public static void LinterSelftest(bool verbose = false, bool fastForward = true) {
-        TestSuite.StartTestSuite(MovementLinterModule.Instance, "test", verbose, fastForward);
+    public static void LinterSelftest(bool verbose = false, bool fastForward = true, string filterPath = "") {
+        TestSuite.StartTestSuite(MovementLinterModule.Instance, "test", filterPath, verbose, fastForward);
     }
 }
