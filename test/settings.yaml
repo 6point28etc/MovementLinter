@@ -28,6 +28,10 @@ BaseRules:
     Mode: false
     Responses:
     - Option: Kill
+  ReleaseWBeforeExit:
+    Mode: false
+    Responses:
+    - Option: Kill
   ReleaseWBeforeDash:
     Mode: false
     Responses:

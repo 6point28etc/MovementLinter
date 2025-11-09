@@ -133,6 +133,12 @@ public static class DialogIds {
     public const string FastBubbleWarnSingular = "MOVEMENT_LINTER_FAST_BUBBLE_WARN_SINGULAR";
     public const string FastBubbleWarnPlural   = "MOVEMENT_LINTER_FAST_BUBBLE_WARN_PLURAL";
 
+    public const string ReleaseWBeforeExit             = "MOVEMENT_LINTER_RELEASE_W_BEFORE_EXIT";
+    public const string ReleaseWBeforeExitHint         = "MOVEMENT_LINTER_RELEASE_W_BEFORE_EXIT_HINT";
+    public const string ReleaseWBeforeExitFrames       = "MOVEMENT_LINTER_RELEASE_W_BEFORE_EXIT_FRAMES";
+    public const string ReleaseWBeforeExitWarnSingular = "MOVEMENT_LINTER_RELEASE_W_BEFORE_EXIT_WARN_SINGULAR";
+    public const string ReleaseWBeforeExitWarnPlural   = "MOVEMENT_LINTER_RELEASE_W_BEFORE_EXIT_WARN_PLURAL";
+
     public const string ReleaseWBeforeDash             = "MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH";
     public const string ReleaseWBeforeDashHint         = "MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_HINT";
     public const string ReleaseWBeforeDashFrames       = "MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_FRAMES";

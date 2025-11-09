@@ -1,0 +1,1 @@
+BaseRules.ReleaseWBeforeExit.Frames 99

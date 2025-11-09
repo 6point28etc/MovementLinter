@@ -575,6 +575,14 @@ public class MovementLinterModule : EverestModule {
             res.DoLintResponses(Settings.JumpReleaseExit, DialogIds.JumpReleaseExitWarnSingular,
                                 DialogIds.JumpReleaseExitWarnPlural, det.JumpReleaseFrames);
         }
+        if ((det.LastFinishedUpdateState == Player.StNormal || det.LastFinishedUpdateState == Player.StStarFly) &&
+                direction.Y == 0 &&
+                !det.ForceMoveXActive &&
+                !det.LastMoveXWasForward &&
+                det.MoveXFrames <= Settings.ReleaseWBeforeExit.Frames) {
+            res.DoLintResponses(Settings.ReleaseWBeforeExit, DialogIds.ReleaseWBeforeExitWarnSingular,
+                                DialogIds.ReleaseWBeforeExitWarnPlural, det.MoveXFrames);
+        }
         det.JumpReleaseFrames  = BeyondShortDurationFrames;
         det.JumpReleaseMatters = false;
         det.FirstMoveX              = true;

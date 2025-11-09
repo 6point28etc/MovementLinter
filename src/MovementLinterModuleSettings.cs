@@ -651,6 +651,26 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
     }
 
     // =================================================================================================================
+    public class ReleaseWBeforeExitSettings : LintRuleSettingsBool {
+        public int Frames { get; set; } = 4;
+
+        public ReleaseWBeforeExitSettings()
+            : base(true, DialogIds.ReleaseWBeforeExit, DialogIds.ReleaseWBeforeExitHint) {}
+
+        protected override List<TextMenu.Item> MakeUniqueMenuItems(bool inGame) {
+            return [
+                new BetterWidthSlider(
+                    label  : Dialog.Clean(DialogIds.ReleaseWBeforeExitFrames),
+                    values : (int val) => val.ToString(),
+                    min    : 1,
+                    max    : MaxShortDurationFrames,
+                    value  : Frames
+                ).Change((int val) => Frames = val)
+            ];
+        }
+    }
+
+    // =================================================================================================================
     public class ReleaseWBeforeDashSettings : LintRuleSettingsBool {
         public int Frames { get; set; } = 4;
 
@@ -765,6 +785,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             MoveAfterGainControl,
             DashAfterUpEntry,
             FastBubble,
+            ReleaseWBeforeExit,
             ReleaseWBeforeDash,
             FastfallGlitchBeforeDash,
             TurnBeforeWallkick,
@@ -812,6 +833,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         public MoveAfterGainControlSettings MoveAfterGainControl { get; set; }         = new();
         public DashAfterUpEntrySettings DashAfterUpEntry { get; set; }                 = new();
         public FastBubbleSettings FastBubble { get; set; }                             = new();
+        public ReleaseWBeforeExitSettings ReleaseWBeforeExit { get; set; }             = new();
         public ReleaseWBeforeDashSettings ReleaseWBeforeDash { get; set; }             = new();
         public FastfallGlitchBeforeDashSettings FastfallGlitchBeforeDash { get; set; } = new();
         public TurnBeforeWallkickSettings TurnBeforeWallkick { get; set; }             = new();
@@ -915,6 +937,15 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             return activeOverride.FastBubble;
         } else {
             return BaseRules.FastBubble;
+        }
+    }}
+
+    [YamlIgnore]
+    public ReleaseWBeforeExitSettings ReleaseWBeforeExit { get {
+        if (activeOverride != null && activeOverride.ReleaseWBeforeExit.OverrideActive) {
+            return activeOverride.ReleaseWBeforeExit;
+        } else {
+            return BaseRules.ReleaseWBeforeExit;
         }
     }}
 

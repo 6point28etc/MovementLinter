@@ -163,6 +163,15 @@ MOVEMENT_LINTER_FAST_BUBBLE_FRAMES=        Frames Late
 MOVEMENT_LINTER_FAST_BUBBLE_WARN_SINGULAR= Detected 1-frame-late fastbubble
 MOVEMENT_LINTER_FAST_BUBBLE_WARN_PLURAL=   Detected {0}-frames-late fastbubble
 
+MOVEMENT_LINTER_RELEASE_W_BEFORE_EXIT=               Release Forward Before Room Exit
+MOVEMENT_LINTER_RELEASE_W_BEFORE_EXIT_HINT=          Detects a change in the moveX input before exiting rooms that results in not
+                                                     holding forward for a few frames. The Release / Turn Frames setting controls
+                                                     the maximum length of the new moveX input to be considered accidental.
+                                                     Only applies to horizontal transitions.
+MOVEMENT_LINTER_RELEASE_W_BEFORE_EXIT_FRAMES=        Release / Turn Frames
+MOVEMENT_LINTER_RELEASE_W_BEFORE_EXIT_WARN_SINGULAR= Detected moveX change 1 frame before room exit
+MOVEMENT_LINTER_RELEASE_W_BEFORE_EXIT_WARN_PLURAL=   Detected moveX change {0} frames before room exit
+
 MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH=               Release Forward Before Dash
 MOVEMENT_LINTER_RELEASE_W_BEFORE_DASH_HINT=          Detects a change in the moveX input before dashing that results in not
                                                      holding forward for a few frames. The Release / Turn Frames setting controls
