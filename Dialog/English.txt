@@ -126,29 +126,33 @@ MOVEMENT_LINTER_JUMP_RELEASE_EXIT_ANY=           Any
 MOVEMENT_LINTER_JUMP_RELEASE_EXIT_WARN_SINGULAR= Detected room transition after 1-frame jump release
 MOVEMENT_LINTER_JUMP_RELEASE_EXIT_WARN_PLURAL=   Detected room transition after {0}-frame jump release
 
-MOVEMENT_LINTER_MOVE_AFTER_LAND=               Unbuffered Move After Landing
-MOVEMENT_LINTER_MOVE_AFTER_LAND_MODE=          Movement Type
-MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_ONLY=     Dash Only
-MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_OR_JUMP=  Dash or Jump
-MOVEMENT_LINTER_MOVE_AFTER_LAND_JUMP_ONLY=     Jump Only
-MOVEMENT_LINTER_MOVE_AFTER_LAND_IGNORE_ULTRAS= Ignore Ultras
-MOVEMENT_LINTER_MOVE_AFTER_LAND_HINT=          Detects late dash or jump inputs after landing on the ground.
-                                               If Ignore Ultras is set, unbuffered jumps after landing for an ultra
-                                               are never considered accidental.
-                                               The Frames Late setting controls the maximum length of waiting
-                                               after landing to be considered accidental.
-MOVEMENT_LINTER_MOVE_AFTER_LAND_FRAMES=        Frames Late
-MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_SINGULAR= Detected movement action 1 frame late after landing
-MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_PLURAL=   Detected movement action {0} frames late after landing
+MOVEMENT_LINTER_MOVE_AFTER_LAND=                    Unbuffered Move After Landing
+MOVEMENT_LINTER_MOVE_AFTER_LAND_MODE=               Movement Type
+MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_ONLY=          Dash Only
+MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_OR_JUMP=       Dash or Jump
+MOVEMENT_LINTER_MOVE_AFTER_LAND_JUMP_ONLY=          Jump Only
+MOVEMENT_LINTER_MOVE_AFTER_LAND_IGNORE_ULTRAS=      Ignore Ultras
+MOVEMENT_LINTER_MOVE_AFTER_LAND_HINT=               Detects late dash or jump inputs after landing on the ground.
+                                                    If Ignore Ultras is set, unbuffered jumps after landing for an ultra
+                                                    are never considered accidental.
+                                                    The Frames Late setting controls the maximum length of waiting
+                                                    after landing to be considered accidental.
+MOVEMENT_LINTER_MOVE_AFTER_LAND_FRAMES=             Frames Late
+MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_DASH_SINGULAR= Detected dash 1 frame late after landing
+MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_DASH_PLURAL=   Detected dash {0} frames late after landing
+MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_JUMP_SINGULAR= Detected jump 1 frame late after landing
+MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_JUMP_PLURAL=   Detected jump {0} frames late after landing
 
-MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL=               Unbuffered Move After Gaining Control
-MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_HINT=          Detects late dash or jump inputs after gaining control of Madeline.
-                                                       The Frames Late setting controls the maximum length of waiting
-                                                       after gaining control to be considered accidental.
-                                                       Does not apply to screen transitions.
-MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_FRAMES=        Frames Late
-MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_SINGULAR= Detected movement action 1 frame late after gaining control
-MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_PLURAL=   Detected movement action {0} frames late after gaining control
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL=                    Unbuffered Move After Gaining Control
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_HINT=               Detects late dash or jump inputs after gaining control of Madeline.
+                                                            The Frames Late setting controls the maximum length of waiting
+                                                            after gaining control to be considered accidental.
+                                                            Does not apply to screen transitions.
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_FRAMES=             Frames Late
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_DASH_SINGULAR= Detected dash 1 frame late after gaining control
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_DASH_PLURAL=   Detected dash {0} frames late after gaining control
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_JUMP_SINGULAR= Detected jump 1 frame late after gaining control
+MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_JUMP_PLURAL=   Detected jump {0} frames late after gaining control
 
 MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY=        Unbuffered Dash After Up Transition
 MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_HINT=   Detects a late dash at the start of a room after an up transition.

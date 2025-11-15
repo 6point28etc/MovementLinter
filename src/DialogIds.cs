@@ -107,22 +107,26 @@ public static class DialogIds {
     public const string JumpReleaseExitWarnSingular = "MOVEMENT_LINTER_JUMP_RELEASE_EXIT_WARN_SINGULAR";
     public const string JumpReleaseExitWarnPlural   = "MOVEMENT_LINTER_JUMP_RELEASE_EXIT_WARN_PLURAL";
 
-    public const string MoveAfterLand             = "MOVEMENT_LINTER_MOVE_AFTER_LAND";
-    public const string MoveAfterLandMode         = "MOVEMENT_LINTER_MOVE_AFTER_LAND_MODE";
-    public const string MoveAfterLandDashOnly     = "MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_ONLY";
-    public const string MoveAfterLandDashOrJump   = "MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_OR_JUMP";
-    public const string MoveAfterLandJumpOnly     = "MOVEMENT_LINTER_MOVE_AFTER_LAND_JUMP_ONLY";
-    public const string MoveAfterLandIgnoreUltras = "MOVEMENT_LINTER_MOVE_AFTER_LAND_IGNORE_ULTRAS";
-    public const string MoveAfterLandHint         = "MOVEMENT_LINTER_MOVE_AFTER_LAND_HINT";
-    public const string MoveAfterLandFrames       = "MOVEMENT_LINTER_MOVE_AFTER_LAND_FRAMES";
-    public const string MoveAfterLandWarnSingular = "MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_SINGULAR";
-    public const string MoveAfterLandWarnPlural   = "MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_PLURAL";
+    public const string MoveAfterLand                 = "MOVEMENT_LINTER_MOVE_AFTER_LAND";
+    public const string MoveAfterLandMode             = "MOVEMENT_LINTER_MOVE_AFTER_LAND_MODE";
+    public const string MoveAfterLandDashOnly         = "MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_ONLY";
+    public const string MoveAfterLandDashOrJump       = "MOVEMENT_LINTER_MOVE_AFTER_LAND_DASH_OR_JUMP";
+    public const string MoveAfterLandJumpOnly         = "MOVEMENT_LINTER_MOVE_AFTER_LAND_JUMP_ONLY";
+    public const string MoveAfterLandIgnoreUltras     = "MOVEMENT_LINTER_MOVE_AFTER_LAND_IGNORE_ULTRAS";
+    public const string MoveAfterLandHint             = "MOVEMENT_LINTER_MOVE_AFTER_LAND_HINT";
+    public const string MoveAfterLandFrames           = "MOVEMENT_LINTER_MOVE_AFTER_LAND_FRAMES";
+    public const string MoveAfterLandWarnDashSingular = "MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_DASH_SINGULAR";
+    public const string MoveAfterLandWarnDashPlural   = "MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_DASH_PLURAL";
+    public const string MoveAfterLandWarnJumpSingular = "MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_JUMP_SINGULAR";
+    public const string MoveAfterLandWarnJumpPlural   = "MOVEMENT_LINTER_MOVE_AFTER_LAND_WARN_JUMP_PLURAL";
 
-    public const string MoveAfterGainControl             = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL";
-    public const string MoveAfterGainControlHint         = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_HINT";
-    public const string MoveAfterGainControlFrames       = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_FRAMES";
-    public const string MoveAfterGainControlWarnSingular = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_SINGULAR";
-    public const string MoveAfterGainControlWarnPlural   = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_PLURAL";
+    public const string MoveAfterGainControl                 = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL";
+    public const string MoveAfterGainControlHint             = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_HINT";
+    public const string MoveAfterGainControlFrames           = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_FRAMES";
+    public const string MoveAfterGainControlWarnDashSingular = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_DASH_SINGULAR";
+    public const string MoveAfterGainControlWarnDashPlural   = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_DASH_PLURAL";
+    public const string MoveAfterGainControlWarnJumpSingular = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_JUMP_SINGULAR";
+    public const string MoveAfterGainControlWarnJumpPlural   = "MOVEMENT_LINTER_MOVE_AFTER_GAIN_CONTROL_WARN_JUMP_PLURAL";
 
     public const string DashAfterUpEntry             = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY";
     public const string DashAfterUpEntryHint         = "MOVEMENT_LINTER_DASH_AFTER_UP_ENTRY_HINT";

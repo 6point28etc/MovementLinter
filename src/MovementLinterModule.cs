@@ -566,8 +566,8 @@ public class MovementLinterModule : EverestModule {
                     det.CouldDashLastFrame &&
                     det.FramesAfterLand > 0 &&
                     det.FramesAfterLand <= Settings.MoveAfterLand.Frames) {
-                res.DoLintResponses(Settings.MoveAfterLand, DialogIds.MoveAfterLandWarnSingular,
-                                    DialogIds.MoveAfterLandWarnPlural, det.FramesAfterLand);
+                res.DoLintResponses(Settings.MoveAfterLand, DialogIds.MoveAfterLandWarnDashSingular,
+                                    DialogIds.MoveAfterLandWarnDashPlural, det.FramesAfterLand);
             }
             int dashLateFramesAfterUpEntry = det.FramesSinceUpTransition - UpEntryDashLockoutFrames;
             if (dashLateFramesAfterUpEntry > 0 &&
@@ -582,8 +582,11 @@ public class MovementLinterModule : EverestModule {
         if (((button == Input.Jump && det.CouldJumpLastFrame) || (button == Input.Dash && det.CouldDashLastFrame)) &&
                 det.InControlFrames > 0 &&
                 det.InControlFrames <= Settings.MoveAfterGainControl.Frames) {
-            res.DoLintResponses(Settings.MoveAfterGainControl, DialogIds.MoveAfterGainControlWarnSingular,
-                                DialogIds.MoveAfterGainControlWarnPlural, det.InControlFrames);
+            string warnSingular = (button == Input.Jump) ? DialogIds.MoveAfterGainControlWarnJumpSingular
+                                                         : DialogIds.MoveAfterGainControlWarnDashSingular;
+            string warnPlural   = (button == Input.Jump) ? DialogIds.MoveAfterGainControlWarnJumpPlural
+                                                         : DialogIds.MoveAfterGainControlWarnDashPlural;
+            res.DoLintResponses(Settings.MoveAfterGainControl, warnSingular, warnPlural, det.InControlFrames);
         }
         // Don't trigger twice if we do multiple actions (e.g. instant hyper)
         det.InControlFrames = BeyondShortDurationFrames;
@@ -598,8 +601,8 @@ public class MovementLinterModule : EverestModule {
                 det.FramesAfterLand > 0 &&
                 det.FramesAfterLand <= Settings.MoveAfterLand.Frames &&
                 !(Settings.MoveAfterLand.IgnoreUltras && det.UltradSinceLanding)) {
-            res.DoLintResponses(Settings.MoveAfterLand, DialogIds.MoveAfterLandWarnSingular,
-                                DialogIds.MoveAfterLandWarnPlural, det.FramesAfterLand);
+            res.DoLintResponses(Settings.MoveAfterLand, DialogIds.MoveAfterLandWarnJumpSingular,
+                                DialogIds.MoveAfterLandWarnJumpPlural, det.FramesAfterLand);
         }
     }
 
