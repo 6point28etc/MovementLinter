@@ -56,8 +56,9 @@ public class MovementLinterModule : EverestModule {
         public Detection() {}
 
         // Some general extra state tracking
-        public int FrameStartPlayerState   = Player.StNormal;
-        public bool RoomLoadJustHappened   = false;
+        public int FrameStartPlayerState = Player.StNormal;
+        public bool RoomLoadJustHappened = false;
+        public bool OnGround             = false;
 
         // Jump release
         public int JumpReleaseFrames   = BeyondShortDurationFrames;
@@ -236,6 +237,12 @@ public class MovementLinterModule : EverestModule {
     }
 
     // =================================================================================================================
+    // Helper since Player.InControl doesn't include templefall for some reason
+    private static bool PlayerInControl(Player player) {
+        return player.InControl && player.StateMachine.State != Player.StTempleFall;
+    }
+
+    // =================================================================================================================
     private static void OnPlayerUpdate(On.Celeste.Player.orig_Update orig, Player player) {
         // Start of frame state tracking
         det.FrameStartPlayerState = player.StateMachine.State;
@@ -243,7 +250,7 @@ public class MovementLinterModule : EverestModule {
         bool jumpPressed                = Input.Jump.Pressed;
         bool autoJumpWasActiveLastFrame = det.AutoJumpWasActive;
         // Move after gain control
-        bool inControl = player.InControl && player.StateMachine.State != Player.StTempleFall;
+        bool inControl = PlayerInControl(player);
         if (inControl && !det.WasInControl) {
             det.InControlFrames = 0;
         }
@@ -354,9 +361,12 @@ public class MovementLinterModule : EverestModule {
 
     private static void CheckLandedOnGround(Player player) {
         if (player.onGround && !player.wasOnGround) {
-            det.FramesAfterLand    = det.RoomLoadJustHappened ? BeyondShortDurationFrames : 0;
+            det.FramesAfterLand    = (det.RoomLoadJustHappened || !PlayerInControl(player)) ? BeyondShortDurationFrames
+                                                                                            : 0;
             det.UltradSinceLanding = det.UltradLastFrame;
         }
+        // Sometimes we want to check onGround without direct access to the player object
+        det.OnGround = player.onGround;
     }
 
     private static void CheckShortWallboost(Player player) {
@@ -544,8 +554,10 @@ public class MovementLinterModule : EverestModule {
                 res.DoLintResponses(Settings.ReleaseWBeforeDash, DialogIds.ReleaseWBeforeDashWarnSingular,
                                     DialogIds.ReleaseWBeforeDashWarnPlural, det.ReleaseWFrames);
             }
-            if (det.FastfallCheckedLastFrame &&
-                    det.FastfallMoveYFrames <= Settings.FastfallGlitchBeforeDash.Frames) {
+            if (det.FastfallMoveYFrames > 0 &&
+                    det.FastfallMoveYFrames <= Settings.FastfallGlitchBeforeDash.Frames &&
+                    det.FastfallCheckedLastFrame &&
+                    !det.OnGround) {
                 res.DoLintResponses(Settings.FastfallGlitchBeforeDash, DialogIds.FastfallGlitchBeforeDashWarnSingular,
                                     DialogIds.FastfallGlitchBeforeDashWarnPlural, det.FastfallMoveYFrames);
             }
