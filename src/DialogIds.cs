@@ -82,11 +82,13 @@ public static class DialogIds {
     public const string AddResponse        = "MOVEMENT_LINTER_ADD_RESPONSE";
     public const string RemoveResponseHint = "MOVEMENT_LINTER_REMOVE_RESPONSE_HINT";
 
-    public const string JumpReleaseJump             = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP";
-    public const string JumpReleaseJumpHint         = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_HINT";
-    public const string JumpReleaseJumpFrames       = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_FRAMES";
-    public const string JumpReleaseJumpWarnSingular = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_WARN_SINGULAR";
-    public const string JumpReleaseJumpWarnPlural   = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_WARN_PLURAL";
+    public const string JumpReleaseJump                 = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP";
+    public const string JumpReleaseJumpHint             = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_HINT";
+    public const string JumpReleaseJumpFrames           = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_FRAMES";
+    public const string JumpReleaseJumpWarnSingular     = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_WARN_SINGULAR";
+    public const string JumpReleaseJumpWarnPlural       = "MOVEMENT_LINTER_JUMP_RELEASE_JUMP_WARN_PLURAL";
+    public const string JumpReleaseAutoJumpWarnSingular = "MOVEMENT_LINTER_JUMP_RELEASE_AUTOJUMP_WARN_SINGULAR";
+    public const string JumpReleaseAutoJumpWarnPlural   = "MOVEMENT_LINTER_JUMP_RELEASE_AUTOJUMP_WARN_PLURAL";
 
     public const string JumpReleaseDash             = "MOVEMENT_LINTER_JUMP_RELEASE_DASH";
     public const string JumpReleaseDashHint         = "MOVEMENT_LINTER_JUMP_RELEASE_DASH_HINT";
