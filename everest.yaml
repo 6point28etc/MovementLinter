@@ -9,3 +9,6 @@
       Version: 3.7.11
     - Name: CelesteTAS
       Version: 3.16.7
+# Depend on a dummy version of extended variants because the patches are incompatible
+    - Name: ExtendedVariantMode
+      Version: 999.999.999
