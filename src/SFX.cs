@@ -10,5 +10,6 @@ public static class SFXExt {
     public const string uhoh              = "event:/movement_linter/uhoh";
     public const string alert             = "event:/movement_linter/alert";
     public const string omg               = "event:/movement_linter/omg";
+    public const string incorrect         = "event:/movement_linter/incorrect";
     public const string boom              = "event:/movement_linter/boom";
 }

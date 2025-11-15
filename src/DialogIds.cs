@@ -56,6 +56,7 @@ public static class DialogIds {
     public const string SFXUhoh        = "MOVEMENT_LINTER_SFX_UHOH";
     public const string SFXAlert       = "MOVEMENT_LINTER_SFX_ALERT";
     public const string SFXOhMyGott    = "MOVEMENT_LINTER_SFX_OHMYGOTT";
+    public const string SFXIncorrect   = "MOVEMENT_LINTER_SFX_INCORRECT";
     public const string SFXBoom        = "MOVEMENT_LINTER_SFX_BOOM";
 
     public const string ColorSelect = "MOVEMENT_LINTER_COLOR_SELECT";

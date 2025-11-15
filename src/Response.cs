@@ -159,6 +159,9 @@ public class LintResponder {
             case MovementLinterModuleSettings.SFXOption.OhMyGott:
                 Audio.Play(SFXExt.omg);
                 break;
+            case MovementLinterModuleSettings.SFXOption.Incorrect:
+                Audio.Play(SFXExt.incorrect);
+                break;
             case MovementLinterModuleSettings.SFXOption.Boom:
                 Audio.Play(SFXExt.boom);
                 break;

@@ -52,6 +52,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
         Uhoh,
         Alert,
         OhMyGott,
+        Incorrect,
         Boom,
     }
     public enum ColorOption {
@@ -149,6 +150,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
                      .Add(Dialog.Clean(DialogIds.SFXUhoh),        SFXOption.Uhoh,        SFX == SFXOption.Uhoh)
                      .Add(Dialog.Clean(DialogIds.SFXAlert),       SFXOption.Alert,       SFX == SFXOption.Alert)
                      .Add(Dialog.Clean(DialogIds.SFXOhMyGott),    SFXOption.OhMyGott,    SFX == SFXOption.OhMyGott)
+                     .Add(Dialog.Clean(DialogIds.SFXIncorrect),   SFXOption.Incorrect,   SFX == SFXOption.Incorrect)
                      .Add(Dialog.Clean(DialogIds.SFXBoom),        SFXOption.Boom,        SFX == SFXOption.Boom)
                      .Change((SFXOption val) => SFX = val);
 
