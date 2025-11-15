@@ -1,6 +1,6 @@
 [submodule "MenuTools"]
 	path = MenuTools
-	url = ./MenuTools
+	url = git@github.com:6point28etc/CelesteMenuTools.git
 [submodule "TasTestSuite"]
 	path = TasTestSuite
-	url = ./TasTestSuite/
+	url = git@github.com:6point28etc/TasTestSuite.git
