@@ -17,7 +17,7 @@ class CustomMiniTextbox : MiniTextbox {
         foreach (FancyText.Node node in text.Nodes) {
             if (node is FancyText.Portrait) {
                 portraitData   = node as FancyText.Portrait;
-                portrait       = GFX.PortraitsSpriteBank.Create("portrait_" + portraitData.Sprite); 
+                portrait       = GFX.PortraitsSpriteBank.Create("portrait_" + portraitData.Sprite);
                 XmlElement xml = GFX.PortraitsSpriteBank.SpriteData["portrait_" + portraitData.Sprite].Sources[0].XML;
                 portraitScale  = portraitSize / xml.AttrFloat("size", 160f);
                 string id      = "textbox/" + xml.Attr("textbox", "default") + "_mini";
