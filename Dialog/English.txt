@@ -192,6 +192,7 @@ MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH=               Fastfall Change Befor
 MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH_HINT=          Detects a short change in the fastfall input before dashing.
                                                            The Fastfall Change Frames setting controls the maximum length
                                                            of the new fastfall input to be considered accidental.
+                                                           Does not apply to grounded dashes.
 MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH_FRAMES=        Fastfall Change Frames
 MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH_WARN_SINGULAR= Detected fastfall input change 1 frame before dash
 MOVEMENT_LINTER_FASTFALL_GLITCH_BEFORE_DASH_WARN_PLURAL=   Detected fastfall input change {0} frames before dash

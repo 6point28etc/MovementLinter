@@ -56,7 +56,6 @@ public class MovementLinterModule : EverestModule {
         public Detection() {}
 
         // Some general extra state tracking
-        public int FrameStartPlayerState = Player.StNormal;
         public bool RoomLoadJustHappened = false;
         public bool OnGround             = false;
 
@@ -101,7 +100,7 @@ public class MovementLinterModule : EverestModule {
         // Fastfall
         public bool FastfallCheckedThisFrame = false;
         public bool FastfallCheckedLastFrame = false;
-        public bool MoveYIsFastfall          = false;
+        public bool MoveYWasFastfall         = false;
         public int FastfallMoveYFrames       = 0;
 
         // Buffered ultra
@@ -245,7 +244,6 @@ public class MovementLinterModule : EverestModule {
     // =================================================================================================================
     private static void OnPlayerUpdate(On.Celeste.Player.orig_Update orig, Player player) {
         // Start of frame state tracking
-        det.FrameStartPlayerState = player.StateMachine.State;
         // Jump release
         bool jumpPressed                = Input.Jump.Pressed;
         bool autoJumpWasActiveLastFrame = det.AutoJumpWasActive;
@@ -316,6 +314,12 @@ public class MovementLinterModule : EverestModule {
         det.LastMoveXWasForward = thisMoveXIsForward;
 
         // Fastfall
+        bool moveYIsFastfall = (Input.MoveY.Value == 1);
+        if (moveYIsFastfall != det.MoveYWasFastfall && !det.RoomLoadJustHappened) {
+            det.FastfallMoveYFrames = 0;
+        }
+        det.MoveYWasFastfall = moveYIsFastfall;
+        ++det.FastfallMoveYFrames;
         det.FastfallCheckedLastFrame = det.FastfallCheckedThisFrame;
 
         // Do this last so it applies for the whole frame
@@ -428,14 +432,14 @@ public class MovementLinterModule : EverestModule {
                         instr => instr.MatchCall(typeof(Math), "Abs"));
         cursor.EmitDelegate<Action>(SetMoveXUsed);
 
-        // Do our fastfall checks right before the vanilla ones
+        // Check if the fastfall input will matter right before vanilla might use it
         cursor.GotoNext(MoveType.After,
                         instr => instr.MatchStfld(typeof(Player), "maxFall"),
                         instr => instr.OpCode == OpCodes.Br,
                         instr => instr.MatchLdsfld(typeof(Input), "MoveY"));
         cursor.Emit(OpCodes.Ldarg_0);
         cursor.Emit(OpCodes.Ldloc, 7);
-        cursor.EmitDelegate<Action<Player, float>>(CheckFastfallInput);
+        cursor.EmitDelegate<Action<Player, float>>(CheckFastfallInputMatters);
 
         // Check if autojump is active and if holding jump matters right before the game starts checking if jump is held
         cursor.GotoNext(MoveType.Before,
@@ -462,14 +466,7 @@ public class MovementLinterModule : EverestModule {
         det.MoveXUsedThisFrame = false;
     }
 
-    private static void CheckFastfallInput(Player player, float fastfallThreshold) {
-        // Always track the status of the fastfall input
-        bool moveYIsFastfall = (Input.MoveY.Value == 1);
-        if (moveYIsFastfall != det.MoveYIsFastfall && !det.RoomLoadJustHappened) {
-            det.FastfallMoveYFrames = 0;
-        }
-        det.MoveYIsFastfall = moveYIsFastfall;
-        ++det.FastfallMoveYFrames;
+    private static void CheckFastfallInputMatters(Player player, float fastfallThreshold) {
         // Decide whether we're actually using the fastfall input this frame
         if (player.Speed.Y >= fastfallThreshold && !player.onGround) {
             det.FastfallCheckedThisFrame = true;
@@ -707,8 +704,7 @@ public class MovementLinterModule : EverestModule {
              (Settings.JumpReleaseExit.Mode == MovementLinterModuleSettings.TransitionDirection.Any)) &&
                 det.JumpReleaseFrames > 0 &&
                 det.JumpReleaseFrames <= Settings.JumpReleaseExit.Frames &&
-                det.JumpReleaseMatters &&
-                det.FrameStartPlayerState == Player.StNormal) {
+                det.JumpReleaseMatters) {
             res.DoLintResponses(Settings.JumpReleaseExit, DialogIds.JumpReleaseExitWarnSingular,
                                 DialogIds.JumpReleaseExitWarnPlural, det.JumpReleaseFrames);
         }

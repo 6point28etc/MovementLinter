@@ -20,11 +20,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="$(LibPath)\FNA.dll"></Reference>
-        <Reference Include="$(LibPath)\Celeste.dll"></Reference>
-        <Reference Include="$(LibPath)\MMHOOK_Celeste.dll"></Reference>
-        <Reference Include="$(LibPath)\SpeedrunTool.dll"></Reference>
-        <Reference Include="$(LibPath)\CelesteTAS.dll"></Reference>
+        <Reference Include="$(LibPath)/FNA.dll"></Reference>
+        <Reference Include="$(LibPath)/Celeste.dll"></Reference>
+        <Reference Include="$(LibPath)/MMHOOK_Celeste.dll"></Reference>
+        <Reference Include="$(LibPath)/SpeedrunTool.dll"></Reference>
+        <Reference Include="$(LibPath)/CelesteTAS.dll"></Reference>
     </ItemGroup>
 
     <ItemGroup>
@@ -34,13 +34,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="Dialog\**">
+        <Content Include="Dialog/**">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <Content Include="Audio\**">
+        <Content Include="Audio/**">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <Content Include="test\**">
+        <Content Include="test/**">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
