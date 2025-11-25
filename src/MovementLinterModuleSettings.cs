@@ -117,6 +117,7 @@ public class MovementLinterModuleSettings : EverestModuleSettings {
             // Make the response menu first since some items need access to it
             RecursiveOptionSubMenu responseMenu = new(label: Dialog.Clean(DialogIds.LintResponse),
                                                       initialMenuSelection: (int) Option,
+                                                      autoEnterExit: true,
                                                       compactRightWidth: compactRightWidth);
 
             // Dialog
