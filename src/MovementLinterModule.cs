@@ -106,7 +106,7 @@ public class MovementLinterModule : EverestModule {
         // Buffered ultra
         public bool UltradLastFrame = false;
     };
-    private static Detection det = new(), savedDet;
+    private static Detection det = new();
 
     // Everything we need to implement the lint responses
     private static LintResponder res = LintResponder.Instance;
@@ -208,9 +208,14 @@ public class MovementLinterModule : EverestModule {
     // Savestates
     private static void AddSaveLoadAction() {
         saveLoadAction = new SaveLoadAction(
-            saveState: (_, _) => { savedDet = det; },
-            loadState: (Dictionary<Type, Dictionary<string, object>> _, Level level) => {
-                det = savedDet;
+            saveState: (Dictionary<Type, Dictionary<string, object>> dict, Level _) => {
+                if (!dict.ContainsKey(typeof(Detection))) {
+                    dict[typeof(Detection)] = [];
+                }
+                dict[typeof(Detection)]["det"] = det;
+            },
+            loadState: (Dictionary<Type, Dictionary<string, object>> dict, Level level) => {
+                det = (Detection) dict[typeof(Detection)]["det"];
                 MovementLinterModuleSettings.LoadOverrides(level);
             },
             clearState: null,
