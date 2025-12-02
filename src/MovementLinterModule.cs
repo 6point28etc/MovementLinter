@@ -65,10 +65,11 @@ public class MovementLinterModule : EverestModule {
         public bool AutoJumpWasActive  = false;
 
         // Move after land
-        public int FramesAfterLand     = BeyondShortDurationFrames;
-        public bool UltradSinceLanding = false;
-        public bool CanDashThisFrame   = true;
-        public bool CouldDashLastFrame = true;
+        public int FramesAfterLand       = BeyondShortDurationFrames;
+        public bool ClearFramesAfterLand = false;
+        public bool UltradSinceLanding   = false;
+        public bool CanDashThisFrame     = true;
+        public bool CouldDashLastFrame   = true;
 
         // Move after gain control
         public bool WasInControl        = false;
@@ -287,6 +288,10 @@ public class MovementLinterModule : EverestModule {
         }
 
         // Move after land
+        if (det.ClearFramesAfterLand) {
+            det.FramesAfterLand      = BeyondShortDurationFrames;
+            det.ClearFramesAfterLand = false;
+        }
         ++det.FramesAfterLand;
         det.CouldDashLastFrame = det.CanDashThisFrame;
         // Move after gain control
@@ -591,7 +596,9 @@ public class MovementLinterModule : EverestModule {
             res.DoLintResponses(Settings.MoveAfterGainControl, warnSingular, warnPlural, det.InControlFrames);
         }
         // Don't trigger twice if we do multiple actions (e.g. instant hyper)
-        det.InControlFrames = BeyondShortDurationFrames;
+        // Need to wait to clear FramesAfterLand since Jump() takes place after this function in the frame
+        det.ClearFramesAfterLand = true;
+        det.InControlFrames      = BeyondShortDurationFrames;
     }
 
     // =================================================================================================================

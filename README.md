@@ -60,6 +60,7 @@ The Jump Release Before Room Exit check runs at the start of any screen transiti
 The `FramesAfterLand` counter is used to measure the time between landing on the ground and doing a dash or jump. The counter is:
 * Incremented at the end of each frame
 * Cleared (reset to a value greater than the maximum configurable length) on `Level.LoadLevel()`
+* Cleared at the end of the frame whenever any kind of jump or dash is performed, to prevent triggering when one action is buffered, then another is performed a few frames later (for example, jumping upon landing, then dashing shortly after)
 * Reset to 0 or cleared before the `Player` state machine runs (after `onGround` has been set for this frame) if Madeline is on the ground this frame and wasn't the previous frame. The counter is cleared if this is the first frame after a `Level.LoadLevel()` or if the player is not in control of Madeline (e.g., Madeline lands on the ground during an intro cutscene). Otherwise, it is reset to 0.
 
 The `UltradSinceLanding` flag is used to track whether Madeline has performed an ultra since landing on the ground, for the purposes of ignoring unbuffered jumps that come after an ultra. Note that when I say "performs an ultra", I refer specifically to the act of receiving the 1.2x speed multiplier when colliding with the ground. The flag is:
