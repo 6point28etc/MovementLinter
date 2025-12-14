@@ -203,6 +203,7 @@ The `UltradLastFrame` flag is used to track when Madeline performed an ultra (re
 
 The BufferedUltra check runs from the part of `Player.NormalUpdate()` that causes Madeline to do a normal ground jump. It activates in the following conditions:
 * Madeline was not on the ground the previous frame
+* Madeline is on the ground this frame
 * Either of these conditions:
     * Madeline is moving down and her previous dash direction was a down-diag (which also indicates she has not ultra'd from that dash yet)
     * The rule is configured to activate even on successful ultras and Madeline performed an ultra since the last frame (`UltradLastFrame` is set), indicating she just landed while her previous dash was a down-diag

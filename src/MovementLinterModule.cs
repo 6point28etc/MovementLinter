@@ -491,6 +491,7 @@ public class MovementLinterModule : EverestModule {
 
     private static void CheckBufferedUltra(Player player) {
         if (!player.wasOnGround &&
+                player.onGround &&
                 ((player.DashDir.X != 0f && player.DashDir.Y > 0f && player.Speed.Y > 0f) ||
                  (Settings.BufferedUltra.Mode == MovementLinterModuleSettings.BufferedUltraMode.Always && det.UltradLastFrame))) {
             res.DoLintResponses(Settings.BufferedUltra, DialogIds.BufferedUltraWarn, DialogIds.BufferedUltraWarn, 0);
